@@ -1,0 +1,105 @@
+.\" Manpage for len.
+.TH man 1 "5 November 2015" "1.0" "Nonstandard Utility: \fBlen\fR"
+.SH NAME
+\fBlen\fR \- ensure the line lengths of a plaintext file are within a certain range
+.SH SYNOPSIS
+\fBlen\fR \-h
+.PP
+\fBlen\fR \-\-help
+.PP
+\fBlen\fR [\fIOPTIONS\fR] \fIFILE\fR
+.SH DESCRIPTION
+.PP
+Scan through text files and check if the lengths of all lines (delimited by newline characters) are within a certain range. The current version of \fBlen\fR does not read from standard input.
+.PP
+By default, \fBlen\fR does not produce any output.
+.PP
+\fBlen\fR can print all lines that meet the criteria, all lines that do not meet the criteria, or print all lines.
+.SH OPTIONS
+Mandatory arguments to long options are mandatory for short options as well. Short options that do not require arguments may be combined.
+.TP
+\fB\-l, \-m, \-\-max\fR \fIMAX_LINE_LENGTH\fR
+Set the upper limit of line lengths. This cannot be negative, nor can it be less than the lower limit, described below. Defaults to 80 characters.
+.TP
+\fB\-M, \-\-min\fR \fIMIN_LINE_LENGTH\fR
+Set the lower limit of line lengths. This cannot be negative, nor can it exceed the upper limit. Defaults to 1 character. Newline characters are
+counted.
+.TP
+\fB\-t, \-\-tab\-width\fR \fITAB_WIDTH\fR
+Set the number of spaces a tab character is considered equivalent to. Defaults to 8 characters.
+.TP
+\fB\-p, \-\-print\-offenders\fR
+Print lines that do not meet line length criteria. When multiple files are specified, lines are reported in sections with filename headers in the format \-\-|FILENAME|\-\-. Can be specified alongside \-P to print all
+lines from all files.
+.TP
+\fB\-P, \-\-print\-matches\fR
+Print lines that meet line length criteria. When multiple files are specified, lines are reported in sections with filename headers in the format \-\-|FILENAME|\-\-. Can be pecified with \-p to print all lines
+from all files.
+.TP
+\fB\-n, \-\-line\-numbers\fR
+Prefix lines with line numbers. Has no effect unless one or both of \-p and \-P are specified.
+.TP
+\fB\-c, \-\-color\fR
+Turns on color. Has no effect unless one or both os \-p and \-P are specified. Parts of lines in excess of MAX_LINE_LENGTH will be printed in red. Lines shorter than MIN_LINE_LENGTH will be rear padded with '\-' characters in red. If MIN_LINE_LENGTH is changed from the default value of 1, parts of lines between MIN_LINE_LENGTH and MAX_LINE_LENGTH will be printed in green. Has no effect unless one or both of \-p and \-P are specified.
+.TP
+\fB\-r, \-\-truncate\fR
+Truncates lines longer than MAX_LINE_LENGTH to a length of MAX_LINE_LENGTH and postfixes them with a '+' character in red.
+.TP
+\fB\-h, \-\-help\fR
+Display help and exit.
+.SH EXAMPLES
+.TP
+.B \fBlen\fR \fIFILE\fR
+Checks \fIFILE\fR to make sure all lines are between 1 and 80 characters long (default behavior).
+.TP
+\fBlen\fR [\fB\-m\fR MAX] [\fB\-M\fR MIN] \fIFILE\fR
+Checks FILE to make sure all lines are between MIN and MAX characters long.
+.TP
+\fBlen\fR [\fI\-np\fR] \fIFILE\fR
+Checks \fIFILE\fR, prints all lines that are out of tolerance, and gives line
+numbers
+.TP
+\fBlen\fR [\fI\-ncp\fR] \fIFILE\fR
+Same as above, but uses colors to help visualize how far out of tolerance
+each line is.
+.TP
+\fBlen\fR [\fI\-ncpr\fR] \fIFILE\fR
+Same as above, but truncates long lines instead of showing full lines.
+.TP
+\fBlen\fR [\fI\-P\fR] \fIFILE\fR
+Checks \fIFILE\fR and prints out all lines whose lengths are within tolerance.
+.TP
+\fBlen\fR [\fI\-pP\fR] \fIFILE\fR
+Checks \fIFILE\fR and prints out the entire contents of \fIFILE\fR.
+.SH EXIT STATUS
+.TP
+.B 0
+All lines in all files were in tolerance
+.TP
+.B 1
+At least one line among all lines read was out of tolerance
+.TP
+.B 250
+Cannot combine options that require arguments
+.TP
+.B 251
+Unrecognized option
+.TP
+.B 252
+Unable to allocate sufficient memory
+.TP
+.B 253
+Could not open specified file
+.TP
+.B 254
+Missing an argument to a flag OR no file specified
+.TP
+.B 255
+No options or arguments given to program
+.SH KNOWN ISSUES
+.B len
+does not ignore lines comprised solely of whitespace save for lines containing a single newline
+.PP
+.SH AUTHOR
+.PP
+Written by Wesley Wei
