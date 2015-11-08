@@ -1,5 +1,5 @@
 .\" Manpage for len.
-.TH man 1 "5 November 2015" "1.0" "Nonstandard Utility: \fBlen\fR"
+.TH man 1 "8 November 2015" "1.1" "Nonstandard Utility: \fBlen\fR"
 .SH NAME
 \fBlen\fR \- ensure the line lengths of a plaintext file are within a certain range
 .SH SYNOPSIS
@@ -18,7 +18,7 @@ By default, \fBlen\fR does not produce any output.
 .SH OPTIONS
 Mandatory arguments to long options are mandatory for short options as well. Short options that do not require arguments may be combined.
 .TP
-\fB\-l, \-m, \-\-max\fR \fIMAX_LINE_LENGTH\fR
+\fB \-m, \-\-max\fR \fIMAX_LINE_LENGTH\fR
 Set the upper limit of line lengths. This cannot be negative, nor can it be less than the lower limit, described below. Defaults to 80 characters.
 .TP
 \fB\-M, \-\-min\fR \fIMIN_LINE_LENGTH\fR
@@ -33,7 +33,7 @@ Print lines that do not meet line length criteria. When multiple files are speci
 lines from all files.
 .TP
 \fB\-P, \-\-print\-matches\fR
-Print lines that meet line length criteria. When multiple files are specified, lines are reported in sections with filename headers in the format \-\-|FILENAME|\-\-. Can be pecified with \-p to print all lines
+Print lines that meet line length criteria. When multiple files are specified, lines are reported in sections with filename headers in the format \-\-|FILENAME|\-\-. Can be specified with \-p to print all lines
 from all files.
 .TP
 \fB\-n, \-\-line\-numbers\fR
@@ -44,6 +44,9 @@ Turns on color. Has no effect unless one or both os \-p and \-P are specified. P
 .TP
 \fB\-r, \-\-truncate\fR
 Truncates lines longer than MAX_LINE_LENGTH to a length of MAX_LINE_LENGTH and postfixes them with a '+' character in red.
+.TP
+\fB\-l, \-\-line\-lengths\fR
+Displays line lengths. Has no effect unless one or both os \-p and \-P are specified.
 .TP
 \fB\-h, \-\-help\fR
 Display help and exit.

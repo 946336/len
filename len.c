@@ -28,7 +28,7 @@ const char *HELP_ME =
 "Options:\n"
 "--NOTE-- Short options not requiring arguments can be combined\n"
 "         i.e. -npr is equivalent to -n -p -r, but -nm is invalid\n"
-"-l, -m, --max: Specify a maximum line length(default: 80)\n"
+"-m, --max: Specify a maximum line length(default: 80)\n"
 "-M, --min: Specify a minimum line length (default: 1)\n"
 "           --NOTE-- The newline character counts as a character\n"
 "-t, --tab-width: Specify how many characters a tab counts as (default: 8)\n"
@@ -39,6 +39,7 @@ const char *HELP_ME =
 "-c --color: Enable coloring parts of lines that are outside of the\n"
 "            specified range. Has no effect unless -P or -p is specified\n"
 "-r, --truncate: Truncate long lines, indicated with \"+\"\n"
+"-l ,--line-length: Show line lengths\n"
 "-h, --help: Display this help and exit\n\n"
 "Return values:\n"
 "\t  0 - All lines were within the specified range\n"
@@ -59,16 +60,16 @@ const char      OPTION         = '-';
 const char      REAR_PADDING    = '-';
 
 /* Short options */
-const char      MAX1           = 'l';
-const char      MAX2           = 'm';
+const char      MAX            = 'm';
 const char      MIN            = 'M';
 const char      TABWIDTH       = 't';
 const char      MATCHES        = 'P'; /* Uppercase */
 const char      OFFENDERS      = 'p'; /* Lowercase */
 const char      LINE_NUMS      = 'n';
 const char      COLOR          = 'c';
-const char      HELP           = 'h';
 const char      TRUNCATE       = 'r';
+const char      LINE_LENGTHS   = 'l';
+const char      HELP           = 'h';
 
 const char      TAB             = '\t';
 
@@ -85,6 +86,7 @@ const char      *COLOR_LONG          = "color";
 const char      *HELP_LONG           = "help";
 const char      *FLAGS_LONG          = "flags";
 const char      *TRUNCATE_LONG       = "truncate";
+const char      *LINE_LENGTHS_LONG   = "line-lengths";
 
 /* Return values */
 const int       NO_ARGS                 = 255;
@@ -105,6 +107,7 @@ bool            lineNums        = false;
 bool            color           = false;
 bool            flags           = false;
 bool            truncate        = false;
+bool            lineLengths     = false;
 
 /****************************************************************************/
 
@@ -185,6 +188,8 @@ int main(int argc, char **argv)
                                         color = true;
                                 } else if (MATCH_L(i, FLAGS_LONG)) {
                                         flags = true;
+                                } else if (MATCH_L(i, LINE_LENGTHS_LONG)) {
+                                        lineLengths = true;
                                 } else if (MATCH_L(i, HELP_LONG)) {
                                         fprintf(stdout, "%s\n", HELP_ME);
                                         exit(EXIT_SUCCESS);
@@ -197,7 +202,7 @@ int main(int argc, char **argv)
                         } /* Loop through for short form options */
                         else for (int j = 1; j < (int) strlen(argv[i]); ++j) {
                         /* max cannot be combined with other options */
-                        if (MATCH_S(i, j, MAX1) || MATCH_S(i, j, MAX2)) {
+                        if (MATCH_S(i, j, MAX)) {
                                 if ((j == 1) && (argv[i][j + 1] == '\0')) {
                                         ARG_CHECK(i);
                                         maxLen = strtol(argv[i],
@@ -252,6 +257,8 @@ int main(int argc, char **argv)
                                 truncate = true;
                         } else if (MATCH_S(i, j, COLOR)) {
                                 color = true;
+                        } else if (MATCH_S(i, j, LINE_LENGTHS)) {
+                                lineLengths = true;
                         } else if (MATCH_S(i, j, HELP)) {
                                 fprintf(stdout, "%s\n", HELP_ME);
                                 exit(EXIT_SUCCESS);
@@ -332,7 +339,7 @@ int main(int argc, char **argv)
 
                         /* Print lines that fit none, either, or any */
                         /* condition. Track violations of the range  */ 
-                        if ((len <= minLen || len >= maxLen)) {
+                        if ((len < minLen || len > maxLen)) {
                                 violated = true;
                                 if (!offenders && !printAll) continue;
                         } else {
@@ -342,9 +349,22 @@ int main(int argc, char **argv)
                         if ((print || printAll) && color) term_default();
                         /* Line numbers up to 9999999 */
                         if ((print || printAll) && lineNums) fprintf(stdout,
-                                                             "%7lu: ",
+                                                             "%7lu ",
                                                              (unsigned long)
                                                              line);
+
+                        if ((print || printAll) && lineLengths) {
+                                if (color){
+                                        if (len < minLen || len > maxLen)
+                                                term_red();
+                                        else term_green();
+                                }
+                                fprintf(stdout, "[%3u]", (unsigned) len);
+                                if (color) term_default();
+                        }
+                        if (print || printAll) {
+                            fprintf(stdout, ": ");
+                        }
 
                         bool overMaxLen = false;
                         bool overMinLen = false;
@@ -364,12 +384,13 @@ int main(int argc, char **argv)
                                         }
                                 }
                                 /* Only turn green once we pass minLen */
-                                if (!overMinLen && (charCount > minLen)){
+                                if (!overMinLen && (charCount >= minLen)){
                                         if (print || printAll || !offenders) {
                                                 overMinLen = true;
                                                 if ((print || printAll)
                                                     && color && (minLen != 1))
-                                                        term_green();
+                                                        if (len <= maxLen)
+                                                                term_green();
                                         }
                                 }
                                 /* Tabs count as tabWidth chars */
@@ -390,7 +411,7 @@ int main(int argc, char **argv)
                         /* account for the newline in nonempty lines      */
                         if (minLen != 1 && len > 1 && charCount < minLen) {
                                 if ((print || printAll) && color) term_red();
-                                for (; charCount <= minLen; ++charCount) {
+                                for (; charCount < (minLen - 1); ++charCount) {
                                         if ((print || printAll) && color)
                                                 fputc(REAR_PADDING, stdout);
                                 }
