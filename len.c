@@ -353,7 +353,7 @@ int main(int argc, char **argv)
 
                         /* Line numbers up to 10^7 - 1 */
                         if ((print || printAll) && lineNums) fprintf(stdout,
-                                                             "%7lu ",
+                                                             "%7lu",
                                                              (unsigned long)
                                                              line);
 
@@ -363,7 +363,7 @@ int main(int argc, char **argv)
                                                 term_red();
                                         else term_green();
                                 }
-                                fprintf(stdout, "[%3u]", (unsigned) len);
+                                fprintf(stdout, " [%3u]", (unsigned) len);
                                 if (color) term_default();
                         }
                         if (print || printAll) {
