@@ -281,6 +281,11 @@ int main(int argc, char **argv)
                 exit(BAD_ARGS);
         }
 
+        /* When the user specifies 0 chars, we have to account for the fact */
+        /* that newlines are, in fact, characters, and will be counted by   */
+        /* the program. */
+        if (minLen == 0) minLen = 1;
+
         if (flags) print_flags(i, argc);
 
         /* If there isn't exactly one argument left unprocessed, fail */
@@ -331,8 +336,8 @@ int main(int argc, char **argv)
                 /* Assignment evaluates to the value assigned           */
                 while((len = my_getline(&buf, &size, fd)) !=
                                         (unsigned long) -1) {
+                        // Real life counting is 1-indexed
                         ++line;
-
 
                         /* Don't consider blank lines */
                         if (len == 1 && !printAll) continue;
@@ -346,15 +351,14 @@ int main(int argc, char **argv)
                                 if (offenders && !printAll) continue;
                         }
 
-                        if ((print || printAll) && color) term_default();
-                        /* Line numbers up to 9999999 */
+                        /* Line numbers up to 10^7 - 1 */
                         if ((print || printAll) && lineNums) fprintf(stdout,
                                                              "%7lu ",
                                                              (unsigned long)
                                                              line);
 
                         if ((print || printAll) && lineLengths) {
-                                if (color){
+                                if ((color) && (len != 1)){
                                         if (len < minLen || len > maxLen)
                                                 term_red();
                                         else term_green();
@@ -383,13 +387,16 @@ int main(int argc, char **argv)
                                                 break;
                                         }
                                 }
-                                /* Only turn green once we pass minLen */
+                                /* Only turn green once we pass minLen, but */
+                                /* don't turn green if only printing lines  */
+                                /* out of tolerance - not relevant there    */
                                 if (!overMinLen && (charCount >= minLen)){
                                         if (print || printAll || !offenders) {
                                                 overMinLen = true;
                                                 if ((print || printAll)
                                                     && color && (minLen != 1))
-                                                        if (len <= maxLen)
+                                                        if ((len <= maxLen) ||
+                                                            printAll)
                                                                 term_green();
                                         }
                                 }
@@ -416,7 +423,9 @@ int main(int argc, char **argv)
                                                 fputc(REAR_PADDING, stdout);
                                 }
                         }
-                        // The last character should be a newline
+                        /* The last character should be a newline. */
+                        /* We also want to reset color here        */
+                        if ((print || printAll) && color) term_default();
                         if (print || printAll) fputc(buf[len - 1], stdout);
                 }
                 /* Extra newline at end of output for visual clarity */
