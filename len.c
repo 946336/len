@@ -302,7 +302,7 @@ int main(int argc, char **argv)
                         exit(BAD_FILE);
                 }
 
-                if (print || printAll) term_default();
+                if ((print || printAll) && color) term_default();
 
                 /* In the case where more than one file is examined, we */
                 /* label the relevant contents of each file as such     */
@@ -339,7 +339,7 @@ int main(int argc, char **argv)
                                 if (offenders && !printAll) continue;
                         }
 
-                        if (print || printAll) term_default();
+                        if ((print || printAll) && color) term_default();
                         /* Line numbers up to 9999999 */
                         if ((print || printAll) && lineNums) fprintf(stdout,
                                                              "%7lu: ",
@@ -359,7 +359,6 @@ int main(int argc, char **argv)
                                         if ((print || printAll) && color)
                                                 term_red();
                                         if (truncate) {
-                                                // index = charCount = len;
                                                 fputc(TRUNCATE_CHAR, stdout);
                                                 break;
                                         }
@@ -397,10 +396,7 @@ int main(int argc, char **argv)
                                 }
                         }
                         // The last character should be a newline
-                        if (print || printAll){
-                                term_default();
-                                fputc(buf[len - 1], stdout);
-                        }
+                        if (print || printAll) fputc(buf[len - 1], stdout);
                 }
                 /* Extra newline at end of output for visual clarity */
                 if ((print || printAll) && violated) fputc('\n', stdout);
