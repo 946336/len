@@ -1,6 +1,5 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include <errno.h>
 
 #include <ctype.h>
 
@@ -19,7 +18,7 @@ const char      *NO_COMBINE             = "Cannot combine option:";
 
 /* Help text */
 const char *HELP_ME = 
-"len version 1.0: Line length checker\n\n"
+"len version 1.1: Line length checker\n\n"
 "Usage: len [OPTIONS] {filename}\n\n"
 "--NOTE-- len's behavior on non plaintext files is undefined\n"
 "--NOTE-- len does not handle lines with nothing but whitespace\n"
