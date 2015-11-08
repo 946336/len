@@ -9,8 +9,6 @@ When piping output from <samp>len</samp> to <samp>less</samp>, be sure to specif
 
 Feel free to glance at the spaghetti code that is the source code. A short description of the options that <samp>len</samp> recognizes is near the top of <samp>len.c</samp>.
 
-Please note that <samp>len</samp> does not currently have the capability to display line lengths in its output.
-
 <hr>
 <h4>Compiling</h4>
 <samp>make len</samp> should do the trick.
