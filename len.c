@@ -301,11 +301,14 @@ int main(int argc, char **argv)
                                                       "for reading");
                         exit(BAD_FILE);
                 }
+
+                term_default();
+
                 /* In the case where more than one file is examined, we */
                 /* label the relevant contents of each file as such     */
                 if (numFiles > 1) {
                         if ((print || printAll)) {
-                                fprintf(stderr, "--|%d: %s|--\n",
+                                fprintf(stdout, "--|%d: %s|--\n",
                                         numFiles - (argc - i) + 1,
                                         argv[i]);
                         }
@@ -323,6 +326,7 @@ int main(int argc, char **argv)
                                         (unsigned long) -1) {
                         ++line;
 
+
                         /* Don't consider blank lines */
                         if (len == 1 && !printAll) continue;
 
@@ -335,8 +339,9 @@ int main(int argc, char **argv)
                                 if (offenders && !printAll) continue;
                         }
 
+                        term_default();
                         /* Line numbers up to 9999999 */
-                        if ((print || printAll) && lineNums) fprintf(stderr,
+                        if ((print || printAll) && lineNums) fprintf(stdout,
                                                              "%7lu: ",
                                                              (unsigned long)
                                                              line);
@@ -391,8 +396,10 @@ int main(int argc, char **argv)
                                 }
                         }
                         // The last character should be a newline
-                        if (print || printAll) term_default();
-                        if (print || printAll) fputc(buf[len - 1], stdout);
+                        if (print || printAll){
+                                term_default();
+                                fputc(buf[len - 1], stdout);
+                        }
                 }
                 /* Extra newline at end of output for visual clarity */
                 if ((print || printAll) && violated) fputc('\n', stdout);
