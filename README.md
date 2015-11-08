@@ -5,7 +5,7 @@ Line length utility
 
 <samp>len</samp> returns <samp>0</samp> if all lines inspected had lengths within a user-specifiable range, and <samp>1</samp> if any line had a length outside of that range. len does not otherwise produce output unless asked to.
 
-When piping output from <samp>len</samp> to <samp>less</samp>, be sure to specify <samp>-r</samp> if you want colors to be displayed properly.
+When piping output from <samp>len</samp> to <samp>less</samp>, be sure to specify <samp>-r</samp> with <samp>less</samp> if you want colors to be displayed properly.
 
 Feel free to glance at the spaghetti code that is the source code. A short description of the options that <samp>len</samp> recognizes is near the top of <samp>len.c</samp>.
 
