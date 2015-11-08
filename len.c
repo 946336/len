@@ -302,7 +302,7 @@ int main(int argc, char **argv)
                         exit(BAD_FILE);
                 }
 
-                term_default();
+                if (print || printAll) term_default();
 
                 /* In the case where more than one file is examined, we */
                 /* label the relevant contents of each file as such     */
@@ -339,7 +339,7 @@ int main(int argc, char **argv)
                                 if (offenders && !printAll) continue;
                         }
 
-                        term_default();
+                        if (print || printAll) term_default();
                         /* Line numbers up to 9999999 */
                         if ((print || printAll) && lineNums) fprintf(stdout,
                                                              "%7lu: ",
@@ -359,8 +359,9 @@ int main(int argc, char **argv)
                                         if ((print || printAll) && color)
                                                 term_red();
                                         if (truncate) {
-                                                index = charCount = len;
+                                                // index = charCount = len;
                                                 fputc(TRUNCATE_CHAR, stdout);
+                                                break;
                                         }
                                 }
                                 /* Only turn green once we pass minLen */
