@@ -21,6 +21,7 @@ len is capable of displaying lines from all files it processed and some informat
 <ul>
     <li>Filenames</li>
     <li>Line numbers</li>
+    <li>Line lengths</li>
     <li>Lines with lengths outside a certain range</li>
     <li>Lines with lengths within a certain range</li>
     <li>All lines from all files inspected</li>
