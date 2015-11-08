@@ -6,11 +6,13 @@
 \fBlen\fR \-h
 .PP
 \fBlen\fR \-\-help
-.PP
-\fBlen\fR [\fIOPTIONS\fR] \fIFILE\fR
+.TP
+\fBlen\fR [\fIOPTIONS\fR] \fI[FILE]\fR
 .SH DESCRIPTION
 .PP
 Scan through text files and check if the lengths of all lines (delimited by newline characters) are within a certain range. The current version of \fBlen\fR does not read from standard input.
+.PP
+Specify [\fI\-\fR] in place of [\fIFILE\fR] to read from \fBstdin\fR.
 .PP
 By default, \fBlen\fR does not produce any output.
 .PP
@@ -40,7 +42,7 @@ from all files.
 Prefix lines with line numbers. Has no effect unless one or both of \-p and \-P are specified.
 .TP
 \fB\-c, \-\-color\fR
-Turns on color. Has no effect unless one or both os \-p and \-P are specified. Parts of lines in excess of MAX_LINE_LENGTH will be printed in red. Lines shorter than MIN_LINE_LENGTH will be rear padded with '\-' characters in red. If MIN_LINE_LENGTH is changed from the default value of 1, parts of lines between MIN_LINE_LENGTH and MAX_LINE_LENGTH will be printed in green. Has no effect unless one or both of \-p and \-P are specified.
+Turns on color. Has no effect unless one or both os \-p and \-P are specified.
 .TP
 \fB\-r, \-\-truncate\fR
 Truncates lines longer than MAX_LINE_LENGTH to a length of MAX_LINE_LENGTH and postfixes them with a '+' character in red.
@@ -55,7 +57,7 @@ Display help and exit.
 .B \fBlen\fR \fIFILE\fR
 Checks \fIFILE\fR to make sure all lines are between 1 and 80 characters long (default behavior).
 .TP
-\fBlen\fR [\fB\-m\fR MAX] [\fB\-M\fR MIN] \fIFILE\fR
+\fBlen\fR [\fB\-m\fR \fIMAX\fR] [\fB\-M\fR \fIMIN\fR] \fIFILE\fR
 Checks FILE to make sure all lines are between MIN and MAX characters long.
 .TP
 \fBlen\fR [\fI\-np\fR] \fIFILE\fR
@@ -95,7 +97,7 @@ Unable to allocate sufficient memory
 Could not open specified file
 .TP
 .B 254
-Missing an argument to a flag OR no file specified
+Missing an argument to a flag
 .TP
 .B 255
 No options or arguments given to program

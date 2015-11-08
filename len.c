@@ -19,13 +19,16 @@ const char      *NO_COMBINE             = "Cannot combine option:";
 /* Help text */
 const char *HELP_ME = 
 "len version 1.1: Line length checker\n\n"
-"Usage: len [OPTIONS] {filename}\n\n"
+"Usage: len [OPTIONS] {filename,-}\n"
+"       Specify [-] as the last option to read from stdin.\n\n"
 "--NOTE-- len's behavior on non plaintext files is undefined\n"
 "--NOTE-- len does not handle lines with nothing but whitespace\n"
 "         particularly elegantly\n"
 "--NOTE-- len does not support regular expressions\n\n"
 "Options:\n"
 "--NOTE-- Short options not requiring arguments can be combined\n"
+"--NOTE-- Arguments to long options are mandatory to their short\n"
+"         counterparts as well.\n"
 "         i.e. -npr is equivalent to -n -p -r, but -nm is invalid\n"
 "-m, --max: Specify a maximum line length(default: 80)\n"
 "-M, --min: Specify a minimum line length (default: 1)\n"
@@ -56,7 +59,10 @@ const char *HELP_ME =
 const char      OPTION         = '-';
 
 /* Used to fill out short lines to maxLen */
-const char      REAR_PADDING    = '-';
+const char      REAR_PADDING   = '-';
+
+/* Specify this last to read from stdin */
+const char      READ_STDIN     = '-';
 
 /* Short options */
 const char      MAX            = 'm';
@@ -73,6 +79,8 @@ const char      HELP           = 'h';
 const char      TAB             = '\t';
 
 const char      TRUNCATE_CHAR   = '+';
+
+const char      NULLCHAR        = '\0';
 
 /* Long arguments */
 const char      *MAX_LONG            = "max";
@@ -142,9 +150,6 @@ size_t my_getline(char **buf, size_t *size, FILE *fd);
 
 int main(int argc, char **argv)
 {
-        /* Suppress unused function warning */
-        (void) print_flags;
-
         if (argc == 1) {
                 fprintf(stderr, "%s\n", USAGE);
                 exit(NO_ARGS);
@@ -154,6 +159,13 @@ int main(int argc, char **argv)
         int i;
         for (i = 1; argv[i] != NULL; ++i) {
                 if (MATCH_S(i, 0, OPTION)){
+                        /* A floating READ_STDIN in the middle of other */
+                        /* options is not acceptable */
+                        if ((i != argc - 1) && MATCH_S(i, 1, NULLCHAR)) {
+                                fprintf(stderr, "%s [%s]\n", BAD_OPTION,
+                                        argv[i]);
+                                exit(WHAT_IS_THAT_FLAG);
+                        }
                         if (MATCH_S(i, 1, OPTION)){ /* Long form option */
                                 if (MATCH_L(i, MAX_LONG)) {
                                         ARG_CHECK(i);
@@ -194,46 +206,46 @@ int main(int argc, char **argv)
                                         exit(EXIT_SUCCESS);
                                 /* Unrecognized option */
                                 } else {
-                                        fprintf(stderr, "%s %s\n", BAD_OPTION,
-                                                argv[i]);
+                                        fprintf(stderr, "%s [%s]\n",
+                                                BAD_OPTION, argv[i]);
                                         exit(WHAT_IS_THAT_FLAG);
                                 }
                         } /* Loop through for short form options */
                         else for (int j = 1; j < (int) strlen(argv[i]); ++j) {
                         /* max cannot be combined with other options */
                         if (MATCH_S(i, j, MAX)) {
-                                if ((j == 1) && (argv[i][j + 1] == '\0')) {
+                                if ((j == 1) && (argv[i][j + 1] == NULLCHAR)) {
                                         ARG_CHECK(i);
                                         maxLen = strtol(argv[i],
                                                  (char **)NULL, 10);
                                 }
                                 else {
-                                        fprintf(stderr, "%s %c\n", NO_COMBINE,
-                                                argv[i][j]);
+                                        fprintf(stderr, "%s [%c]\n",
+                                                NO_COMBINE, argv[i][j]);
                                         exit(BAD_COMBINE);
                                 }
                         /* min cannot be combined with other options */
                         } else if (MATCH_S(i, j, MIN)) {
-                                if ((j == 1) && (argv[i][j + 1] == '\0')) {
+                                if ((j == 1) && (argv[i][j + 1] == NULLCHAR)) {
                                         ARG_CHECK(i);
                                         minLen = strtol(argv[i],
                                                  (char **)NULL, 10);
                                 }
                                 else {
-                                        fprintf(stderr, "%s %c\n", NO_COMBINE,
-                                                argv[i][j]);
+                                        fprintf(stderr, "%s [%c]\n",
+                                                NO_COMBINE, argv[i][j]);
                                         exit(BAD_COMBINE);
                                 }
                         /* tab-width cannot be combined with other options */
                         } else if (MATCH_S(i, j, TABWIDTH)) {
-                                if ((j == 1) && (argv[i][j + 1] == '\0')) {
+                                if ((j == 1) && (argv[i][j + 1] == NULLCHAR)) {
                                         ARG_CHECK(i);
                                         tabWidth = strtol(argv[i],
                                                    (char **)NULL, 10);
                                 }
                                 else {
-                                        fprintf(stderr, "%s %c\n", NO_COMBINE,
-                                                argv[i][j]);
+                                        fprintf(stderr, "%s [%c]\n",
+                                                NO_COMBINE, argv[i][j]);
                                         exit(BAD_COMBINE);
                                 }
                         /* Yes, this is terrible. I know */
@@ -263,7 +275,7 @@ int main(int argc, char **argv)
                                 exit(EXIT_SUCCESS);
                         /* Unrecognized option */
                         } else {
-                                fprintf(stderr, "%s %s\n", BAD_OPTION,
+                                fprintf(stderr, "%s [%s]\n", BAD_OPTION,
                                         argv[i]);
                                 exit(WHAT_IS_THAT_FLAG);
                         }
@@ -274,7 +286,7 @@ int main(int argc, char **argv)
 
         /* Sanity check: minLen must not be greater than maxLen */
         /*               Both must also be nonnegative          */
-        if (maxLen <= minLen) {
+        if (maxLen < minLen) {
                 fprintf(stderr, "%s\n", "Maximum length must be greater "
                                         "than minimum length!\n");
                 exit(BAD_ARGS);
@@ -285,27 +297,33 @@ int main(int argc, char **argv)
         /* the program. */
         if (minLen == 0) minLen = 1;
 
-        if (flags) print_flags(i, argc);
-
-        /* If there isn't exactly one argument left unprocessed, fail */
-        /* I don't think this is strictly necessary, but it's probably good */
-        /* Form to have it anyway */
-        if (argc - i < 1) {
-                fprintf(stderr, "%s\n", NO_FILE);
-                fprintf(stderr, "%s\n", USAGE);
-                exit(BAD_ARGS);
-        }
-
         /* These must persist and are set per file examined */
         FILE *fd = NULL;
         char *buf = NULL;
         int numFiles = argc - i;
+
+        if (flags) print_flags(i, argc);
+
+        /* If no file specified but '-' specified as last option, read from */
+        /* stdin instead and reduce i so that we pretend stdin is a file.   */
+        if ((argv[argc - 1][0] == READ_STDIN &&
+                        argv[argc - 1][1] == NULLCHAR)) {
+                fd = stdin;
+                i--;
+        }
+
+        /* If no file(s) provided, read from stdin instead */
+        if (argc - i < 1) {
+                fprintf(stderr, "%s\n", NO_FILE);
+                exit(BAD_FILE);
+        }
+
         /* violated is tracked cumulatively. A violation in any file will */
         /* cause the enntire batch to be reported as bad                  */
         bool violated = false;
 
         for (; i < argc; ++i) {
-                fd = fopen(argv[i], "r");
+                if (fd != stdin) fd = fopen(argv[i], "r");
                 if (fd == NULL){
                         fprintf(stderr, "%s %s %s\n", "Could not open file",
                                                       argv[argc - 1],
@@ -319,7 +337,7 @@ int main(int argc, char **argv)
                 /* label the relevant contents of each file as such     */
                 if (numFiles > 1) {
                         if ((print || printAll)) {
-                                fprintf(stdout, "--|%d: %s|--\n",
+                                fprintf(stdout, "\n--|%d: %s|--\n",
                                         numFiles - (argc - i) + 1,
                                         argv[i]);
                         }
@@ -342,7 +360,9 @@ int main(int argc, char **argv)
                         if (len == 1 && !printAll) continue;
 
                         /* Print lines that fit none, either, or any */
-                        /* condition. Track violations of the range  */ 
+                        /* condition. Track violations of the range. */
+                        /* Don't count newlines at the end of non    */
+                        /* empty lines.                              */ 
                         if ((len < minLen || len > maxLen)) {
                                 violated = true;
                                 if (!offenders && !printAll) continue;
@@ -365,7 +385,7 @@ int main(int argc, char **argv)
                                 fprintf(stdout, " [%3u]", (unsigned) len);
                                 if (color) term_default();
                         }
-                        if (print || printAll) {
+                        if ((print || printAll) && (lineNums || lineLengths)) {
                             fprintf(stdout, ": ");
                         }
 
@@ -377,7 +397,7 @@ int main(int argc, char **argv)
                         for (charCount = 0; charCount < (len - 1) &&
                                             index < (len - 1); ++index) {
                                 /* Only turn red once we pass maxLen*/
-                                if (!overMaxLen && charCount > maxLen){
+                                if (!overMaxLen && charCount >= maxLen){
                                         overMaxLen = true;
                                         if ((print || printAll) && color)
                                                 term_red();
@@ -496,7 +516,7 @@ size_t my_getline(char **buf, size_t *size, FILE *fd)
                 else {
                         (*buf)[i] = c;
                         if ((*buf)[i] == DELIM) {
-                                (*buf)[++i] = '\0';
+                                (*buf)[++i] = NULLCHAR;
                                 return i;
                         }
                 }
@@ -510,6 +530,6 @@ size_t my_getline(char **buf, size_t *size, FILE *fd)
         } while(c > 0); /* EOF returns a negative value */
 
         /* It turns out we'll never get here */
-        (*buf)[i] = '\0';
+        (*buf)[i] = NULLCHAR;
         return ++i;
 }
