@@ -6,6 +6,8 @@
 #include <stdbool.h>
 #include <string.h>
 
+#define MY_GETLINE_TABWIDTH tabWidth
+
 /*******************************CONSTANTS************************************/
 
 /* Error messages */
@@ -122,15 +124,15 @@ bool            lineLengths     = false;
 /* Used to make sure that the arguments given to flags that require them */
 /* are "valid"                                                           */
 #define ARG_CHECK(I) if ((argc - 1) < ++I) {                                 \
-                                fprintf(stderr, "%s %s %s\n", BAD_ARG,       \
-                                argv[I - 1], "requires a numeric argument"); \
-                                exit(BAD_ARGS);                              \
-                     }                                                       \
-                     if (!isdigit(argv[I][0])) {                             \
-                                fprintf(stderr, "%s %s %s\n", BAD_ARG,       \
-                                argv[I - 1], "requires a numeric argument"); \
-                                exit(BAD_ARGS);                              \
-                     }
+				fprintf(stderr, "%s %s %s\n", BAD_ARG,       \
+				argv[I - 1], "requires a numeric argument"); \
+				exit(BAD_ARGS);                              \
+		     }                                                       \
+		     if (!isdigit(argv[I][0])) {                             \
+				fprintf(stderr, "%s %s %s\n", BAD_ARG,       \
+				argv[I - 1], "requires a numeric argument"); \
+				exit(BAD_ARGS);                              \
+		     }
 
 /* Shothand for matching long ans short flags */
 #define MATCH_S(I, J, SHORT_FLAG) argv[I][J] == SHORT_FLAG
@@ -145,407 +147,440 @@ inline static void term_red();
 inline static void term_green();
 inline static void term_default();
 
-/* I won't use the GNU getline() here. */
+/* I won't use the GNU getline() here.					 */
+/* my_getline() will react to the MY_GETLINE_TABWIDTH macro by expanding */
+/* tabs to that many spaces                                              */
 size_t my_getline(char **buf, size_t *size, FILE *fd);
+
+void parseArgs(int argc, char **argv, int *i);
 
 int main(int argc, char **argv)
 {
-        if (argc == 1) {
-                fprintf(stderr, "%s\n", USAGE);
-                exit(NO_ARGS);
-        }
-        
-        /* Parse arguments */
-        int i;
-        for (i = 1; argv[i] != NULL; ++i) {
-                if (MATCH_S(i, 0, OPTION)){
-                        /* A floating READ_STDIN in the middle of other */
-                        /* options is not acceptable */
-                        if ((i != argc - 1) && MATCH_S(i, 1, NULLCHAR)) {
-                                fprintf(stderr, "%s [%s]\n", BAD_OPTION,
-                                        argv[i]);
-                                exit(WHAT_IS_THAT_FLAG);
-                        }
-                        if (MATCH_S(i, 1, OPTION)){ /* Long form option */
-                                if (MATCH_L(i, MAX_LONG)) {
-                                        ARG_CHECK(i);
-                                        maxLen = strtol(argv[i],
-                                                        (char **)NULL, 10);
-                                } else if (MATCH_L(i, MIN_LONG)) {
-                                        ARG_CHECK(i);
-                                        minLen = strtol(argv[i],
-                                                 (char **)NULL, 10);
-                                } else if (MATCH_L(i, TABWIDTH_LONG)) {
-                                        ARG_CHECK(i);
-                                        tabWidth = strtol(argv[i],
-                                                         (char **)NULL, 10);
-                                } else if (MATCH_L(i, MATCHES_LONG)) {
-                                        if (offenders) printAll = true;
-                                        if (!print) {
-                                                print = true;
-                                                offenders = false;
-                                        }
-                                } else if (MATCH_L(i, OFFENDERS_LONG)) {
-                                        if (!offenders) printAll = true;
-                                        if (!print) {
-                                                print = true;
-                                                offenders = true;
-                                        }
-                                } else if (MATCH_L(i, LINE_NUMS_LONG)) {
-                                        lineNums = true;
-                                } else if (MATCH_L(i, TRUNCATE_LONG)) {
-                                        truncate = true;
-                                } else if (MATCH_L(i, COLOR_LONG)) {
-                                        color = true;
-                                } else if (MATCH_L(i, FLAGS_LONG)) {
-                                        flags = true;
-                                } else if (MATCH_L(i, LINE_LENGTHS_LONG)) {
-                                        lineLengths = true;
-                                } else if (MATCH_L(i, HELP_LONG)) {
-                                        fprintf(stdout, "%s\n", HELP_ME);
-                                        exit(EXIT_SUCCESS);
-                                /* Unrecognized option */
-                                } else {
-                                        fprintf(stderr, "%s [%s]\n",
-                                                BAD_OPTION, argv[i]);
-                                        exit(WHAT_IS_THAT_FLAG);
-                                }
-                        } /* Loop through for short form options */
-                        else for (int j = 1; j < (int) strlen(argv[i]); ++j) {
-                        /* max cannot be combined with other options */
-                        if (MATCH_S(i, j, MAX)) {
-                                if ((j == 1) && (argv[i][j + 1] == NULLCHAR)) {
-                                        ARG_CHECK(i);
-                                        maxLen = strtol(argv[i],
-                                                 (char **)NULL, 10);
-                                }
-                                else {
-                                        fprintf(stderr, "%s [%c]\n",
-                                                NO_COMBINE, argv[i][j]);
-                                        exit(BAD_COMBINE);
-                                }
-                        /* min cannot be combined with other options */
-                        } else if (MATCH_S(i, j, MIN)) {
-                                if ((j == 1) && (argv[i][j + 1] == NULLCHAR)) {
-                                        ARG_CHECK(i);
-                                        minLen = strtol(argv[i],
-                                                 (char **)NULL, 10);
-                                }
-                                else {
-                                        fprintf(stderr, "%s [%c]\n",
-                                                NO_COMBINE, argv[i][j]);
-                                        exit(BAD_COMBINE);
-                                }
-                        /* tab-width cannot be combined with other options */
-                        } else if (MATCH_S(i, j, TABWIDTH)) {
-                                if ((j == 1) && (argv[i][j + 1] == NULLCHAR)) {
-                                        ARG_CHECK(i);
-                                        tabWidth = strtol(argv[i],
-                                                   (char **)NULL, 10);
-                                }
-                                else {
-                                        fprintf(stderr, "%s [%c]\n",
-                                                NO_COMBINE, argv[i][j]);
-                                        exit(BAD_COMBINE);
-                                }
-                        /* Yes, this is terrible. I know */
-                        /* printAll overrides the offenders when set */
-                        } else if (MATCH_S(i, j, MATCHES)) {
-                                if (print) printAll = true;
-                                if (!print) {
-                                        print = true;
-                                        offenders = false;
-                                }
-                        } else if (MATCH_S(i, j, OFFENDERS)) {
-                                if (print) printAll = true;
-                                if (!print) {
-                                        print = true;
-                                        offenders = true;
-                                }
-                        } else if (MATCH_S(i, j, LINE_NUMS)) {
-                                lineNums = true;
-                        } else if (MATCH_S(i, j, TRUNCATE)) {
-                                truncate = true;
-                        } else if (MATCH_S(i, j, COLOR)) {
-                                color = true;
-                        } else if (MATCH_S(i, j, LINE_LENGTHS)) {
-                                lineLengths = true;
-                        } else if (MATCH_S(i, j, HELP)) {
-                                fprintf(stdout, "%s\n", HELP_ME);
-                                exit(EXIT_SUCCESS);
-                        /* Unrecognized option */
-                        } else {
-                                fprintf(stderr, "%s [%s]\n", BAD_OPTION,
-                                        argv[i]);
-                                exit(WHAT_IS_THAT_FLAG);
-                        }
-                /* I still have no idea which set of braces I didn't close */
-                /* properly                                                */
-                } } else break;
-        }
+	if (argc == 1) {
+		fprintf(stderr, "%s\n", USAGE);
+		exit(NO_ARGS);
+	}
+	
+	int i;
+	parseArgs(argc, argv, &i);
 
-        /* Sanity check: minLen must not be greater than maxLen */
-        /*               Both must also be nonnegative          */
-        if (maxLen < minLen) {
-                fprintf(stderr, "%s\n", "Maximum length must be greater "
-                                        "than minimum length!\n");
-                exit(BAD_ARGS);
-        }
+	/* Sanity check: minLen must not be greater than maxLen */
+	/*               Both must also be nonnegative          */
+	if (maxLen < minLen) {
+		fprintf(stderr, "%s\n", "Maximum length must be greater "
+					"than minimum length!\n");
+		exit(BAD_ARGS);
+	}
 
-        /* When the user specifies 0 chars, we have to account for the fact */
-        /* that newlines are, in fact, characters, and will be counted by   */
-        /* the program. */
-        if (minLen == 0) minLen = 1;
+	/* When the user specifies 0 chars, we have to account for the fact */
+	/* that newlines are, in fact, characters, and will be counted by   */
+	/* the program.                                                     */
+	if (minLen == 0) minLen = 1;
 
-        /* These must persist and are set per file examined */
-        FILE *fd = NULL;
-        char *buf = NULL;
-        int numFiles = argc - i;
+	int numFiles = argc - i;
 
-        if (flags) print_flags(i, argc);
+	/* These must persist and are set for each file examined */
+	FILE *fd = NULL;
+	char *buf = NULL;
 
-        /* If no file specified but '-' specified as last option, read from */
-        /* stdin instead and reduce i so that we pretend stdin is a file.   */
-        if ((argv[argc - 1][0] == READ_STDIN &&
-                        argv[argc - 1][1] == NULLCHAR)) {
-                fd = stdin;
-                i--;
-        }
+	if (flags) print_flags(i, argc);
 
-        /* If no file(s) provided, read from stdin instead */
-        if (argc - i < 1) {
-                fprintf(stderr, "%s\n", NO_FILE);
-                exit(BAD_FILE);
-        }
+	/* If no file specified but '-' specified as last option, read from */
+	/* stdin instead and reduce i so that we pretend stdin is a file.   */
+	if ((argv[argc - 1][0] == READ_STDIN &&
+			argv[argc - 1][1] == NULLCHAR)) {
+		fd = stdin;
+		i--;
+	}
 
-        /* violated is tracked cumulatively. A violation in any file will */
-        /* cause the enntire batch to be reported as bad                  */
-        bool violated = false;
+	if (argc - i < 1) {
+		fprintf(stderr, "%s\n", NO_FILE);
+		exit(BAD_FILE);
+	}
 
-        for (; i < argc; ++i) {
-                if (fd != stdin) fd = fopen(argv[i], "r");
-                if (fd == NULL){
-                        fprintf(stderr, "%s %s %s\n", "Could not open file",
-                                                      argv[argc - 1],
-                                                      "for reading");
-                        exit(BAD_FILE);
-                }
+	/* violated is tracked cumulatively. A violation in any file will */
+	/* cause the enntire batch to be reported as bad                  */
+	bool violated = false;
 
-                if ((print || printAll) && color) term_default();
+	for (; i < argc; ++i) {
+		if (fd != stdin) fd = fopen(argv[i], "r");
+		if (fd == NULL){
+			fprintf(stderr, "%s %s %s\n", "Could not open file",
+						      argv[argc - 1],
+						      "for reading");
+			exit(BAD_FILE);
+		}
 
-                /* In the case where more than one file is examined, we */
-                /* label the relevant contents of each file as such     */
-                if (numFiles > 1) {
-                        if ((print || printAll)) {
-                                /* Only print a newline above this filename */
-                                /* if the previous file had lines listed    */
-                                fprintf(stdout, "\n--|%d: %s|--\n",
-                                        numFiles - (argc - i) + 1,
-                                        argv[i]);
-                        }
-                }
+		if ((print || printAll) && color) term_default();
 
-                size_t size = 0;
-                size_t line = 0;
-                size_t len = -1;
-                size_t index = 0;
-                size_t charCount = 0;
+		/* In the case where more than one file is examined, we */
+		/* label the relevant contents of each file as such     */
+		if (numFiles > 1) {
+			if ((print || printAll)) {
+				fprintf(stdout, "\n--|%d: %s|--\n",
+					numFiles - (argc - i) + 1,
+					argv[i]);
+			}
+		}
 
-                /* This is a weird trick. Change if weird things happen */
-                /* Assignment evaluates to the value assigned           */
-                while((len = my_getline(&buf, &size, fd)) !=
-                                        (unsigned long) -1) {
-                        // Real life counting is 1-indexed
-                        ++line;
+		size_t size = 0;
+		size_t line = 0;
+		size_t len = -1;
+		size_t index = 0;
+		size_t charCount = 0;
 
-                        /* Don't consider blank lines */
-                        if (len == 1 && !printAll) continue;
+		/* Assignment evaluates to the value assigned */
+		while((len = my_getline(&buf, &size, fd)) !=
+					(unsigned long) -1) {
+			// Real life counting is 1-indexed
+			++line;
 
-                        /* Print lines that fit none, either, or any */
-                        /* condition. Track violations of the range. */
-                        /* Don't count newlines at the end of non    */
-                        /* empty lines.                              */ 
-                        if ((len < minLen || len > maxLen)) {
-                                violated = true;
-                                if (!offenders && !printAll) continue;
-                        } else {
-                                if (offenders && !printAll) continue;
-                        }
+			/* Don't process blank lines for violations  */
+			if (len == 1 && !printAll) continue;
 
-                        /* Line numbers up to 10^7 - 1 */
-                        if ((print || printAll) && lineNums) fprintf(stdout,
-                                                             "%7lu",
-                                                             (unsigned long)
-                                                             line);
+			/* Print lines that fit none, either, or any */
+			/* condition. Track violations of the range. */
+			/* Don't count newlines at the end of non    */
+			/* empty lines. ( > instead of >= )          */ 
+			if ((len < minLen || len > maxLen)) {
+				violated = true;
+				if (!offenders && !printAll) continue;
+			} else {
+				if (offenders && !printAll) continue;
+			}
 
-                        if ((print || printAll) && lineLengths) {
-                                if ((color) && (len != 1)){
-                                        if (len < minLen || len > maxLen)
-                                                term_red();
-                                        else term_green();
-                                }
-                                fprintf(stdout, " [%3u]", (unsigned) len);
-                                if (color) term_default();
-                        }
-                        if ((print || printAll) && (lineNums || lineLengths)) {
-                            fprintf(stdout, ": ");
-                        }
+			/* Line numbers up to 10^7 - 1. If your files is   */
+			/* longer than that, you have bigger problems than */
+			/* the output from this program not lining up      */
+			if ((print || printAll) && lineNums) fprintf(stdout,
+							     "%7lu",
+							     (unsigned long)
+							     line);
 
-                        bool overMaxLen = false;
-                        bool overMinLen = false;
-                        index = 0;
+			/* Line lengths up to 10^3 - 1. If your  lines are */
+			/* longer than that, you have other problems.      */
+			if ((print || printAll) && lineLengths) {
+				if ((color) && (len != 1)){
+					if (len < minLen || len > maxLen)
+						term_red();
+					else term_green();
+				}
+				fprintf(stdout, " [%3u]", (unsigned) len);
+				if (color) term_default();
+			}
+			if ((print || printAll) && (lineNums || lineLengths)) {
+			    fprintf(stdout, ": ");
+			}
 
-                        /* Yes, I know this is stupid. Trust me. */
-                        for (charCount = 0; charCount < (len - 1) &&
-                                            index < (len - 1); ++index) {
-                                /* Only turn red once we pass maxLen*/
-                                if (!overMaxLen && charCount >= maxLen){
-                                        overMaxLen = true;
-                                        if ((print || printAll) && color)
-                                                term_red();
-                                        if (truncate) {
-                                                fprintf(stdout, "%c",
-                                                        TRUNCATE_CHAR);
-                                                break;
-                                        }
-                                }
-                                /* Only turn green once we pass minLen, but */
-                                /* don't turn green if only printing lines  */
-                                /* out of tolerance - not relevant there    */
-                                if (!overMinLen && (charCount >= (minLen - 1))){
-                                        if (print || printAll || !offenders) {
-                                                overMinLen = true;
-                                                if ((print || printAll)
-                                                    && color && (minLen != 1))
-                                                        if ((len <= maxLen) ||
-                                                            printAll)
-                                                                term_green();
-                                        }
-                                }
-                                /* Tabs count as tabWidth chars */
-                                if (buf[index] == TAB){
-                                        if ((print || printAll))
-                                                for (size_t q = 0;
-                                                     q < tabWidth; ++q)
-                                                        fputc(' ', stdout);
-                                        charCount += tabWidth;
-                                        // len += (tabWidth - 1);
-                                } else if ((print || printAll)) {
-                                        fprintf(stdout, "%c", buf[index]);
-                                        ++charCount;
-                                }
-                        }
-                        /* We don't want to rear pad if no minimum length */
-                        /* is set.                                        */
-                        /* Don't punish empty lines, but don't forget to  */
-                        /* account for the newline in nonempty lines      */
-                        if (minLen != 1 && len > 1 && charCount < minLen) {
-                                if ((print || printAll) && color) term_red();
-                                for (; charCount < (minLen - 1); ++charCount) {
-                                        if ((print || printAll) && color){
-                                                fprintf(stdout, "%c",
-                                                        REAR_PADDING);
-                                        }
-                                }
-                        }
-                        /* The last character should be a newline. */
-                        /* We also want to reset color here        */
-                        if ((print || printAll) && color) term_default();
-                        if ((print || printAll))
-                                fprintf(stdout, "%c", '\n');
-                                // fprintf(stdout, "%c", buf[len - 1]);
-                }
+			bool overMaxLen = false;
+			bool overMinLen = false;
+			index = 0;
 
-                fclose(fd);
-        }
+			/* Yes, I know this is stupid. Trust me. */
+			for (charCount = 0; charCount < (len - 1) &&
+					    index < (len - 1); ++index) {
 
-        /* Extra newline at end of output for visual clarity */
-        fprintf(stdout, "\n");
+				/* Only turn red once we pass maxLen */
+				if (!overMaxLen && charCount >= maxLen){
+					overMaxLen = true;
+					if ((print || printAll) && color)
+						term_red();
+					if (truncate) {
+						fprintf(stdout, "%c",
+							TRUNCATE_CHAR);
+						break;
+					}
+				}
 
-        free(buf);
-        return violated ? EXIT_FAILURE : EXIT_SUCCESS;
+				/* Only turn green once we pass minLen, but */
+				/* don't turn green if only printing lines  */
+				/* out of tolerance - not relevant there    */
+				if (!overMinLen && (charCount >= (minLen - 1))){
+					if (print || printAll || !offenders) {
+						overMinLen = true;
+						if ((print || printAll)
+						    && color && (minLen != 1))
+							if ((len <= maxLen) ||
+							    printAll)
+								term_green();
+					}
+				}
+
+				if ((print || printAll)) {
+					if (buf[index] != '\n')
+						fprintf(stdout, "%c", buf[index]);
+					++charCount;
+				}
+			}
+
+			/* We don't want to rear pad if no minimum length */
+			/* is set.                                        */
+			/* Don't punish empty lines, but don't forget to  */
+			/* account for the newline in nonempty lines      */
+			if (minLen != 1 && len > 1 && charCount < minLen) {
+				if ((print || printAll) && color) term_red();
+				for (; charCount < (minLen - 1); ++charCount) {
+					if ((print || printAll) && color){
+						fprintf(stdout, "%c",
+							REAR_PADDING);
+					}
+				}
+			}
+			/* The last character should be a newline. We take */
+			/* this opporunity to reset terminal text color.   */
+			if ((print || printAll) && color) term_default();
+			if ((print || printAll))
+				fprintf(stdout, "%c", '\n');
+		}
+
+		fclose(fd);
+	}
+
+	/* Extra newline at end of output for visual clarity */
+	fprintf(stdout, "\n");
+
+	free(buf);
+	return violated ? EXIT_FAILURE : EXIT_SUCCESS;
+}
+
+void parseArgs(int argc, char **argv, int *i)
+{
+	for (*i = 1; argv[*i] != NULL; ++(*i)) {
+		if (MATCH_S(*i, 0, OPTION)){
+			/* A floating READ_STDIN in the middle of other */
+			/* options is not acceptable */
+			if ((*i != argc - 1) && MATCH_S(*i, 1, NULLCHAR)) {
+				fprintf(stderr, "%s [%s]\n", BAD_OPTION,
+					argv[*i]);
+				exit(WHAT_IS_THAT_FLAG);
+			}
+			if (MATCH_S(*i, 1, OPTION)){ /* Long form options */
+				if (MATCH_L(*i, MAX_LONG)) {
+					ARG_CHECK(*i);
+					maxLen = strtol(argv[*i],
+							(char **)NULL, 10);
+				} else if (MATCH_L(*i, MIN_LONG)) {
+					ARG_CHECK(*i);
+					minLen = strtol(argv[*i],
+						 (char **)NULL, 10);
+				} else if (MATCH_L(*i, TABWIDTH_LONG)) {
+					ARG_CHECK(*i);
+					tabWidth = strtol(argv[*i],
+							 (char **)NULL, 10);
+				} else if (MATCH_L(*i, MATCHES_LONG)) {
+					if (offenders) printAll = true;
+					if (!print) {
+						print = true;
+						offenders = false;
+					}
+				} else if (MATCH_L(*i, OFFENDERS_LONG)) {
+					if (!offenders) printAll = true;
+					if (!print) {
+						print = true;
+						offenders = true;
+					}
+				} else if (MATCH_L(*i, LINE_NUMS_LONG)) {
+					lineNums = true;
+				} else if (MATCH_L(*i, TRUNCATE_LONG)) {
+					truncate = true;
+				} else if (MATCH_L(*i, COLOR_LONG)) {
+					color = true;
+				} else if (MATCH_L(*i, FLAGS_LONG)) {
+					flags = true;
+				} else if (MATCH_L(*i, LINE_LENGTHS_LONG)) {
+					lineLengths = true;
+				} else if (MATCH_L(*i, HELP_LONG)) {
+					fprintf(stdout, "%s\n", HELP_ME);
+					exit(EXIT_SUCCESS);
+				/* Unrecognized option */
+				} else {
+					fprintf(stderr, "%s [%s]\n",
+						BAD_OPTION, argv[*i]);
+					exit(WHAT_IS_THAT_FLAG);
+				}
+			}
+
+			/* Loop through for short form options */
+			else for (int j = 1; j < (int) strlen(argv[*i]); ++j) {
+			/* max cannot be combined with other options */
+			if (MATCH_S(*i, j, MAX)) {
+				if ((j == 1) && (argv[*i][j + 1] == NULLCHAR)) {
+					ARG_CHECK(*i);
+					maxLen = strtol(argv[*i],
+						 (char **)NULL, 10);
+				}
+				else {
+					fprintf(stderr, "%s [%c]\n",
+						NO_COMBINE, argv[*i][j]);
+					exit(BAD_COMBINE);
+				}
+			/* min cannot be combined with other options */
+			} else if (MATCH_S(*i, j, MIN)) {
+				if ((j == 1) && (argv[*i][j + 1] == NULLCHAR)) {
+					ARG_CHECK(*i);
+					minLen = strtol(argv[*i],
+						 (char **)NULL, 10);
+				}
+				else {
+					fprintf(stderr, "%s [%c]\n",
+						NO_COMBINE, argv[*i][j]);
+					exit(BAD_COMBINE);
+				}
+			/* tab-width cannot be combined with other options */
+			} else if (MATCH_S(*i, j, TABWIDTH)) {
+				if ((j == 1) && (argv[*i][j + 1] == NULLCHAR)) {
+					ARG_CHECK(*i);
+					tabWidth = strtol(argv[*i],
+						   (char **)NULL, 10);
+				}
+				else {
+					fprintf(stderr, "%s [%c]\n",
+						NO_COMBINE, argv[*i][j]);
+					exit(BAD_COMBINE);
+				}
+			/* printAll overrides the offenders when set */
+			} else if (MATCH_S(*i, j, MATCHES)) {
+				if (print) printAll = true;
+				if (!print) {
+					print = true;
+					offenders = false;
+				}
+			} else if (MATCH_S(*i, j, OFFENDERS)) {
+				if (print) printAll = true;
+				if (!print) {
+					print = true;
+					offenders = true;
+				}
+			} else if (MATCH_S(*i, j, LINE_NUMS)) {
+				lineNums = true;
+			} else if (MATCH_S(*i, j, TRUNCATE)) {
+				truncate = true;
+			} else if (MATCH_S(*i, j, COLOR)) {
+				color = true;
+			} else if (MATCH_S(*i, j, LINE_LENGTHS)) {
+				lineLengths = true;
+			} else if (MATCH_S(*i, j, HELP)) {
+				fprintf(stdout, "%s\n", HELP_ME);
+				exit(EXIT_SUCCESS);
+			/* Unrecognized option */
+			} else {
+				fprintf(stderr, "%s [%s]\n", BAD_OPTION,
+					argv[*i]);
+				exit(WHAT_IS_THAT_FLAG);
+			}
+		/* I still have no idea which set of braces I didn't close */
+		/* properly                                                */
+		} } else break;
+	}
 }
 
  /* Print all flags to check if they're set correctly */
 inline static void print_flags(int i, int argc)
 {
-        fprintf(stderr, "argc: [%d], i:[%d]\n", argc, i);
-        fprintf(stderr, "%s: %lu\n", "maxLen", (unsigned long) maxLen);
-        fprintf(stderr, "%s: %lu\n", "minLen", (unsigned long) minLen);
-        fprintf(stderr, "%s: %lu\n", "tabWidth", (unsigned long) tabWidth);
-        fprintf(stderr, "%s: %s\n", "print", print ? "true" : "false");
-        fprintf(stderr, "%s: %s\n", "printAll", printAll ? "true" : "false");
-        fprintf(stderr, "%s: %s\n", "offenders",
-                                    offenders ? "true" : "false");
-        fprintf(stderr, "%s: %s\n", "matches", !offenders ? "true" : "false");
-        fprintf(stderr, "%s: %s\n", "lineNums", lineNums ? "true" : "false");
-        fprintf(stderr, "%s: %s\n", "color", color ? "true" : "false");
+	fprintf(stderr, "argc: [%d], option groups specified:[%d]\n", argc, i);
+	fprintf(stderr, "%s: %lu\n", "maxLen", (unsigned long) maxLen);
+	fprintf(stderr, "%s: %lu\n", "minLen", (unsigned long) minLen);
+	fprintf(stderr, "%s: %lu\n", "tabWidth", (unsigned long) tabWidth);
+	fprintf(stderr, "%s: %s\n", "print", print ? "true" : "false");
+	fprintf(stderr, "%s: %s\n", "printAll", printAll ? "true" : "false");
+	fprintf(stderr, "%s: %s\n", "offenders",
+				    offenders ? "true" : "false");
+	fprintf(stderr, "%s: %s\n", "matches", !offenders ? "true" : "false");
+	fprintf(stderr, "%s: %s\n", "lineNums", lineNums ? "true" : "false");
+	fprintf(stderr, "%s: %s\n", "color", color ? "true" : "false");
 }
 
 static const char *ESC = "\033[";
 
 inline static void term_red()
 {
-        printf("%s31m", ESC);
+	printf("%s31m", ESC);
 }
 
 inline static void term_green()
 {
-        printf("%s32m", ESC);
+	printf("%s32m", ESC);
 }
 
 inline static void term_default()
 {
-        printf("%s0m", ESC);
+	printf("%s0m", ESC);
 }
 
+/* Expanding tabs is controlled by the MY_GETLINE_TABWIDTH define */
+/* If MY_GETLINE_TABWIDTH is defined, my_getline() will replace   */
+/* \t with however many spaces MY_GETLINE_TABWIDTH evaluates to   */
 size_t my_getline(char **buf, size_t *size, FILE *fd)
 {
-        static const int INIT_SIZE = 256;
-        static const char DELIM1 = '\n';
-        static const char DELIM2 = '\r';
+	static const int INIT_SIZE = 256;
+	static const char DELIM1 = '\n';
+	static const char DELIM2 = '\r';
 
-        if (size == NULL) return (size_t) -1;
+	if (size == NULL) return (size_t) -1;
 
-        if (*buf == NULL) {
-                *buf = malloc(INIT_SIZE * sizeof(**buf));
-                if (*buf == NULL) return (size_t) -1;
-                *size = INIT_SIZE;
-        }
+	if (*buf == NULL) {
+		*buf = malloc(INIT_SIZE * sizeof(**buf));
+		if (*buf == NULL) return (size_t) -1;
+		*size = INIT_SIZE;
+	}
 
-        int c;
-        size_t i = 0;
-        size_t extraFromTabs = 0;
-        char peeking;
-        do {
-                c = fgetc(fd);
-                if (c < 0){
-                        if (i == 0){
-                                *size = -1;
-                                return (size_t) -1;
-                        }
-                }
-                else {
-                        (*buf)[i] = c;
-                        if ((*buf)[i] == TAB) extraFromTabs += (tabWidth - 1);
-                        if (((*buf)[i] == DELIM1) || (*buf)[i] == DELIM2) {
-                                if ((c == DELIM2) &&
-                                        (peeking = fgetc(fd)) != DELIM1)
-                                                ungetc(peeking, fd);
-                                (*buf)[++i] = NULLCHAR;
-                                return i + extraFromTabs;
-                        }
-                }
-                if ((i++ + 1) == *size){
-                        *buf = realloc(*buf, 2 * (*size) + 1);
-                        *size += 2;
-                        if (buf == NULL) {
-                                return (size_t) -1;
-                        }
-                }
-        } while(c > 0); /* EOF returns a negative value */
+	int c;
+	size_t i = 0;
 
-        /* It turns out we'll never get here */
-        (*buf)[i] = NULLCHAR;
-        return ++i + extraFromTabs;
+	char peeking;
+	do {
+		c = fgetc(fd);
+		/* Lines that are actually blank (no newline at all) are */
+		/* reported as invalid. Should only happen in an empty   */
+		/* file.                                                 */
+		if (c < 0){
+			if (i == 0){
+				*size = -1;
+				return (size_t) -1;
+			}
+		}
+		else {
+			(*buf)[i] = c;
+			/* UNIX line endings:       \n   */
+			/* OSX line endings:        \r   */
+			/* Windows lien eendings    \r\n */
+			#if defined(MY_GETLINE_TABWIDTH)
+				if ((*buf)[i] == TAB) {
+					if (*size <= i + MY_GETLINE_TABWIDTH) {
+						*buf = realloc(*buf,
+							      2 * (*size) + 1);
+						*size *= 2;
+						if (*buf == NULL)
+							return (size_t) -1;
+					}
+					for (size_t q = i;
+					     q < i + MY_GETLINE_TABWIDTH; ++q) {
+						(*buf)[q] = ' ';
+					}
+					i += MY_GETLINE_TABWIDTH - 1;
+				}
+			#endif
+			/* UNIX or OSX */
+			if (((*buf)[i] == DELIM1) || (*buf)[i] == DELIM2) {
+				/* Windows */
+				if ((c == DELIM2) &&
+					(peeking = fgetc(fd)) != DELIM1)
+						ungetc(peeking, fd);
+				(*buf)[++i] = NULLCHAR;
+				// fprintf(stderr, "%s\n", *buf);
+				return i;
+			}
+		}
+		if ((i++ + 1) == *size){
+			*buf = realloc(*buf, 2 * (*size) + 1);
+			*size += 2;
+			if (*buf == NULL) {
+				return (size_t) -1;
+			}
+		}
+	} while(c > 0); /* EOF returns a negative value */
+
+	(*buf)[i] = NULLCHAR;
+	// fprintf(stderr, "%s\n", *buf);
+	return i;
 }
