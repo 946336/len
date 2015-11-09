@@ -10,7 +10,7 @@
 \fBlen\fR [\fIOPTIONS\fR] \fI[FILE]\fR
 .SH DESCRIPTION
 .PP
-Scan through text files and check if the lengths of all lines (delimited by newline characters) are within a certain range. The current version of \fBlen\fR does not read from standard input.
+Scan through text files and check if the lengths of all lines (delimited by newline characters) are within a certain range. \fBlen\fR can process multiple files in a single invocation.
 .PP
 Specify [\fI\-\fR] in place of [\fIFILE\fR] to read from \fBstdin\fR.
 .PP
@@ -102,9 +102,8 @@ Missing an argument to a flag
 .B 255
 No options or arguments given to program
 .SH KNOWN ISSUES
-.B len
-does not ignore lines comprised solely of whitespace save for lines containing a single newline
 .PP
+\fBlen\fR does not ignore lines comprised solely of whitespace save for lines containing a single newline
 .SH AUTHOR
 .PP
 Written by Wesley Wei

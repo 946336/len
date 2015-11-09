@@ -337,6 +337,8 @@ int main(int argc, char **argv)
                 /* label the relevant contents of each file as such     */
                 if (numFiles > 1) {
                         if ((print || printAll)) {
+                                /* Only print a newline above this filename */
+                                /* if the previous file had lines listed    */
                                 fprintf(stdout, "\n--|%d: %s|--\n",
                                         numFiles - (argc - i) + 1,
                                         argv[i]);
@@ -402,14 +404,15 @@ int main(int argc, char **argv)
                                         if ((print || printAll) && color)
                                                 term_red();
                                         if (truncate) {
-                                                fputc(TRUNCATE_CHAR, stdout);
+                                                fprintf(stdout, "%c",
+                                                        TRUNCATE_CHAR);
                                                 break;
                                         }
                                 }
                                 /* Only turn green once we pass minLen, but */
                                 /* don't turn green if only printing lines  */
                                 /* out of tolerance - not relevant there    */
-                                if (!overMinLen && (charCount >= minLen)){
+                                if (!overMinLen && (charCount >= (minLen - 1))){
                                         if (print || printAll || !offenders) {
                                                 overMinLen = true;
                                                 if ((print || printAll)
@@ -426,8 +429,9 @@ int main(int argc, char **argv)
                                                      q < tabWidth; ++q)
                                                         fputc(' ', stdout);
                                         charCount += tabWidth;
+                                        // len += (tabWidth - 1);
                                 } else if ((print || printAll)) {
-                                        fputc(buf[index], stdout);
+                                        fprintf(stdout, "%c", buf[index]);
                                         ++charCount;
                                 }
                         }
@@ -438,20 +442,25 @@ int main(int argc, char **argv)
                         if (minLen != 1 && len > 1 && charCount < minLen) {
                                 if ((print || printAll) && color) term_red();
                                 for (; charCount < (minLen - 1); ++charCount) {
-                                        if ((print || printAll) && color)
-                                                fputc(REAR_PADDING, stdout);
+                                        if ((print || printAll) && color){
+                                                fprintf(stdout, "%c",
+                                                        REAR_PADDING);
+                                        }
                                 }
                         }
                         /* The last character should be a newline. */
                         /* We also want to reset color here        */
                         if ((print || printAll) && color) term_default();
-                        if (print || printAll) fputc(buf[len - 1], stdout);
+                        if ((print || printAll))
+                                fprintf(stdout, "%c", '\n');
+                                // fprintf(stdout, "%c", buf[len - 1]);
                 }
-                /* Extra newline at end of output for visual clarity */
-                if ((print || printAll) && violated) fputc('\n', stdout);
 
                 fclose(fd);
         }
+
+        /* Extra newline at end of output for visual clarity */
+        fprintf(stdout, "\n");
 
         free(buf);
         return violated ? EXIT_FAILURE : EXIT_SUCCESS;
@@ -493,7 +502,8 @@ inline static void term_default()
 size_t my_getline(char **buf, size_t *size, FILE *fd)
 {
         static const int INIT_SIZE = 256;
-        static const char DELIM = '\n';
+        static const char DELIM1 = '\n';
+        static const char DELIM2 = '\r';
 
         if (size == NULL) return (size_t) -1;
 
@@ -505,6 +515,8 @@ size_t my_getline(char **buf, size_t *size, FILE *fd)
 
         int c;
         size_t i = 0;
+        size_t extraFromTabs = 0;
+        char peeking;
         do {
                 c = fgetc(fd);
                 if (c < 0){
@@ -515,9 +527,13 @@ size_t my_getline(char **buf, size_t *size, FILE *fd)
                 }
                 else {
                         (*buf)[i] = c;
-                        if ((*buf)[i] == DELIM) {
+                        if ((*buf)[i] == TAB) extraFromTabs += (tabWidth - 1);
+                        if (((*buf)[i] == DELIM1) || (*buf)[i] == DELIM2) {
+                                if ((c == DELIM2) &&
+                                        (peeking = fgetc(fd)) != DELIM1)
+                                                ungetc(peeking, fd);
                                 (*buf)[++i] = NULLCHAR;
-                                return i;
+                                return i + extraFromTabs;
                         }
                 }
                 if ((i++ + 1) == *size){
@@ -531,5 +547,5 @@ size_t my_getline(char **buf, size_t *size, FILE *fd)
 
         /* It turns out we'll never get here */
         (*buf)[i] = NULLCHAR;
-        return ++i;
+        return ++i + extraFromTabs;
 }
