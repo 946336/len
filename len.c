@@ -63,9 +63,6 @@ const char      OPTION         = '-';
 /* Used to fill out short lines to maxLen */
 const char      REAR_PADDING   = '-';
 
-/* Specify this last to read from stdin */
-const char      READ_STDIN     = '-';
-
 /* Short options */
 const char      MAX            = 'm';
 const char      MIN            = 'M';
@@ -78,11 +75,8 @@ const char      TRUNCATE       = 'r';
 const char      LINE_LENGTHS   = 'l';
 const char      HELP           = 'h';
 
-const char      TAB             = '\t';
-
-const char      TRUNCATE_CHAR   = '+';
-
-const char      NULLCHAR        = '\0';
+/* Specify this last to read from stdin */
+const char      READ_STDIN     = '-';
 
 /* Long arguments */
 const char      *MAX_LONG            = "max";
@@ -96,6 +90,11 @@ const char      *HELP_LONG           = "help";
 const char      *FLAGS_LONG          = "flags";
 const char      *TRUNCATE_LONG       = "truncate";
 const char      *LINE_LENGTHS_LONG   = "line-lengths";
+
+const char      TRUNCATE_CHAR   = '+';
+
+const char      TAB             = '\t';
+const char      NULLCHAR        = '\0';
 
 /* Return values */
 const int       NO_ARGS                 = 255;
@@ -307,8 +306,7 @@ int main(int argc, char **argv)
 				}
 
 				if ((print || printAll)) {
-					if (buf[index] != '\n')
-						fprintf(stdout, "%c", buf[index]);
+					fprintf(stdout, "%c", buf[index]);
 					++charCount;
 				}
 			}
@@ -326,6 +324,7 @@ int main(int argc, char **argv)
 					}
 				}
 			}
+			
 			/* The last character should be a newline. We take */
 			/* this opporunity to reset terminal text color.   */
 			if ((print || printAll) && color) term_default();
@@ -488,6 +487,8 @@ inline static void print_flags(int i, int argc)
 	fprintf(stderr, "%s: %s\n", "matches", !offenders ? "true" : "false");
 	fprintf(stderr, "%s: %s\n", "lineNums", lineNums ? "true" : "false");
 	fprintf(stderr, "%s: %s\n", "color", color ? "true" : "false");
+	fprintf(stderr, "%s: %s\n", "lineLengths",
+				    lineLengths ? "true" : "false");
 }
 
 static const char *ESC = "\033[";
@@ -539,6 +540,7 @@ size_t my_getline(char **buf, size_t *size, FILE *fd)
 				return (size_t) -1;
 			}
 		}
+
 		else {
 			(*buf)[i] = c;
 			/* UNIX line endings:       \n   */
@@ -567,7 +569,6 @@ size_t my_getline(char **buf, size_t *size, FILE *fd)
 					(peeking = fgetc(fd)) != DELIM1)
 						ungetc(peeking, fd);
 				(*buf)[++i] = NULLCHAR;
-				// fprintf(stderr, "%s\n", *buf);
 				return i;
 			}
 		}
@@ -581,6 +582,5 @@ size_t my_getline(char **buf, size_t *size, FILE *fd)
 	} while(c > 0); /* EOF returns a negative value */
 
 	(*buf)[i] = NULLCHAR;
-	// fprintf(stderr, "%s\n", *buf);
 	return i;
 }
