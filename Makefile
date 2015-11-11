@@ -1,8 +1,7 @@
-CC = gcc
-CXX = g++
+# Makefile for len
 
+CC = gcc
 CFLAGS = -Wall -Wextra -pedantic -std=c99
-CXXFLAGS = -Wall -Wextra -std=gnu11
 
 DEBUG = -g
 OPTIMIZE = -O3
