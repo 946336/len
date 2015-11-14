@@ -3,7 +3,7 @@ Line length utility
 
 <samp>len</samp> is a small utility that counts line lengths from text files. Its behavior on other file types is undefined and probably not very safe.
 
-<samp>len</samp> returns <samp>0</samp> if all lines inspected had lengths within a user-specifiable range, and <samp>1</samp> if any line had a length outside of that range. len does not otherwise produce output unless asked to.
+By default, <samp>len</samp> does not produce any output on stdout or stderr.
 
 When piping output from <samp>len</samp> to <samp>less</samp>, be sure to specify <samp>-r</samp> with <samp>less</samp> if you want colors to be displayed properly.
 
@@ -14,6 +14,11 @@ Feel free to glance at the spaghetti code that is the source code. A short descr
 <samp>make len</samp> should do the trick.
 </br>
 <samp>len</samp> is written to <samp>-std=c99 -pedantic</samp> under <samp>gcc 4.8.0.</samp>
+<hr>
+
+<h4>Return Value</h4>
+<samp>len</samp> returns 0 when all lines inspected had lengths within the specified/default range.
+<samp>len</samp> returns 1 when at least one line inspected had a length outside the specified/default range.
 
 <hr>
 <h4>Other Capabilities</h4>
