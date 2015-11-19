@@ -547,7 +547,7 @@ size_t my_getline(char **buf, size_t *size, FILE *fd)
                         (*buf)[i] = c;
                         /* UNIX line endings:       \n   */
                         /* OSX line endings:        \r   */
-                        /* Windows lien eendings    \r\n */
+                        /* Windows line eendings    \r\n */
                         #if defined(MY_GETLINE_TABWIDTH)
                                 if ((*buf)[i] == TAB) {
                                         if (*size <= i + MY_GETLINE_TABWIDTH) {
@@ -564,7 +564,7 @@ size_t my_getline(char **buf, size_t *size, FILE *fd)
                                         i += MY_GETLINE_TABWIDTH - 1;
                                 }
                         #endif
-                        /* UNIX or OSX */
+                        /* UNIX or OS9 */
                         if (((*buf)[i] == DELIM1) || (*buf)[i] == DELIM2) {
                                 /* Windows */
                                 if ((c == DELIM2) &&
@@ -574,7 +574,7 @@ size_t my_getline(char **buf, size_t *size, FILE *fd)
                                 return i;
                         }
                 }
-                if ((i++ + 1) == *size){
+                if ((i++ + 1) >= *size){
                         *buf = realloc(*buf, 2 * (*size) + 1);
                         *size += 2;
                         if (*buf == NULL) {
