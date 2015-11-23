@@ -2,6 +2,7 @@
 #include <stdio.h>
 
 #include <ctype.h>
+#include <limits.h>
 
 #include <stdbool.h>
 #include <string.h>
@@ -162,6 +163,9 @@ int main(int argc, char **argv)
         
         int i;
         parseArgs(argc, argv, &i);
+
+        /* If a negative number is entered, maxLen becomes a very large */
+        /* number. No extra processing needed. */
 
         /* Sanity check: minLen must not be greater than maxLen */
         /*               Both must also be nonnegative          */

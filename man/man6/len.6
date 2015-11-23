@@ -21,10 +21,10 @@ By default,\fBlen\fR does not produce any output.
 Mandatory arguments to long options are mandatory for short options as well. Short options that do not require arguments may be combined.
 .TP
 \fB\-m, \-\-max\fR \fIMAX_LINE_LENGTH\fR
-Set the upper limit of line lengths. This cannot be negative, nor can it be less than the lower limit, described below. Defaults to 80 characters.
+Set the upper limit of line lengths. This cannot be positive and less than the lower limit, described below. Negative values cause MAX_LINE_LENGTH to take on a very large value. Defaults to 80 characters.
 .TP
 \fB\-M, \-\-min\fR \fIMIN_LINE_LENGTH\fR
-Set the lower limit of line lengths. This cannot be negative, nor can it exceed the upper limit. Defaults to 1 character. Newline characters are
+Set the lower limit of line lengths. This cannot exceed the upper limit. Defaults to 1 character. Newline characters are
 counted.
 .TP
 \fB\-t, \-\-tab\-width\fR \fITAB_WIDTH\fR
