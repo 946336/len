@@ -1,7 +1,8 @@
 .\" Manpage for len.
 .TH man 6 "8 November 2015" "1.1" "Nonstandard Utility: \fBlen\fR"
 .SH NAME
-\fBlen\fR \- ensure the line lengths of a plaintext file are within a certain range
+.PP
+\fBlen\fR \- ensure the line lengths of a plaintext file are within a certain range. Originally intended for source code.
 .SH SYNOPSIS
 \fBlen\fR \-h
 .PP
@@ -10,7 +11,8 @@
 \fBlen\fR [\fIOPTIONS\fR] \fI[FILE]\fR
 .SH DESCRIPTION
 .PP
-Scan through text files and check if the lengths of all lines (delimited by newline characters) are within a certain range. \fBlen\fR can process multiple files in a single invocation.
+Scan through text files and check if the lengths of all lines (delimited by newline characters) are within a certain range.
+\fBlen\fR can process multiple files in a single invocation.
 .PP
 Specify [\fI\-\fR] in place of [\fIFILE\fR] to read from \fBstdin\fR.
 .PP
@@ -21,7 +23,7 @@ By default,\fBlen\fR does not produce any output.
 Mandatory arguments to long options are mandatory for short options as well. Short options that do not require arguments may be combined.
 .TP
 \fB\-m, \-\-max\fR \fIMAX_LINE_LENGTH\fR
-Set the upper limit of line lengths. This cannot be positive and less than the lower limit, described below. Negative values cause MAX_LINE_LENGTH to take on a very large value. Defaults to 80 characters.
+Set the upper limit of line lengths. This cannot be negative or less than the lower limit, described below. Defaults to 80 characters.
 .TP
 \fB\-M, \-\-min\fR \fIMIN_LINE_LENGTH\fR
 Set the lower limit of line lengths. This cannot exceed the upper limit. Defaults to 1 character. Newline characters are

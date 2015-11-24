@@ -14,6 +14,7 @@
 /* Error messages */
 const char      *USAGE                  = "Usage: len [OPTIONS] {filename}";
 const char      *BAD_ARG                = "Bad argument:";
+const char      *BAD_STDIN              = "Cannot specify - with other files";
 const char      *INCOMPLETE_ARG         = "Incomplete arguments to a flag";
 const char      *NO_FILE                = "No file specified";
 const char      *BAD_OPTION             = "Unrecognized option:";
@@ -105,10 +106,12 @@ const int       MEM_EXCEEDED            = 252;
 const int       WHAT_IS_THAT_FLAG       = 251;
 const int       BAD_COMBINE             = 250;
 
-/* Behavior flags controlled by args to program */
+/* Default values */
 unsigned        maxLen          = 80;
 unsigned        minLen          = 1; /* Empty lines are 1 character long */
 unsigned        tabWidth        = 8;
+
+/* Behavior flags controlled by args to program */
 bool            print           = false;
 bool            printAll        = false;
 bool            offenders       = true;   /* Has no effect without print */
@@ -136,7 +139,7 @@ bool            lineLengths     = false;
 
 /* Shothand for matching long ans short flags */
 #define MATCH_S(I, J, SHORT_FLAG) argv[I][J] == SHORT_FLAG
-#define MATCH_L(I, LONG_FLAG)  !strcmp(&(argv[I][2]), LONG_FLAG)
+#define MATCH_L(I, LONG_FLAG) !strcmp(&(argv[I][2]), LONG_FLAG)
 
 /* Print flags for debugging purposes */
 /* Printout enabled by the "flags" option */
@@ -152,7 +155,7 @@ inline static void term_default();
 /* tabs to that many spaces                                              */
 size_t my_getline(char **buf, size_t *size, FILE *fd);
 
-void parseArgs(int argc, char **argv, int *i);
+int parseArgs(int argc, char **argv);
 
 int main(int argc, char **argv)
 {
@@ -161,14 +164,10 @@ int main(int argc, char **argv)
                 exit(NO_ARGS);
         }
         
-        int i;
-        parseArgs(argc, argv, &i);
+        /* i will give the index of the first filename */
+        int i = parseArgs(argc, argv);
 
-        /* If a negative number is entered, maxLen becomes a very large */
-        /* number. No extra processing needed. */
-
-        /* Sanity check: minLen must not be greater than maxLen */
-        /*               Both must also be nonnegative          */
+        /* Sanity check: minLen must not be greater than maxLen          */
         if (maxLen < minLen) {
                 fprintf(stderr, "%s\n", "Maximum length must be greater "
                                         "than minimum length!\n");
@@ -191,11 +190,17 @@ int main(int argc, char **argv)
         /* If no file specified but '-' specified as last option, read from */
         /* stdin instead and reduce i so that we pretend stdin is a file.   */
         if ((argv[argc - 1][0] == READ_STDIN &&
-                        argv[argc - 1][1] == NULLCHAR)) {
-                fd = stdin;
-                i--;
+            argv[argc - 1][1] == NULLCHAR)) {
+                if (numFiles == 0) {
+                        fd = stdin;
+                        i--;
+                } else {
+                        fprintf(stderr, "%s\n", BAD_STDIN);
+                        exit(BAD_ARGS);
+                }
         }
 
+        /* If no file specified, print an error message and exit */
         if (argc - i < 1) {
                 fprintf(stderr, "%s\n", NO_FILE);
                 exit(BAD_FILE);
@@ -205,6 +210,7 @@ int main(int argc, char **argv)
         /* cause the enntire batch to be reported as bad                  */
         bool violated = false;
 
+        /* Process each remaining argument as a filename */
         for (; i < argc; ++i) {
                 if (fd != stdin) fd = fopen(argv[i], "r");
                 if (fd == NULL){
@@ -216,8 +222,8 @@ int main(int argc, char **argv)
 
                 if ((print || printAll) && color) term_default();
 
-                /* In the case where more than one file is examined, we */
-                /* label the relevant contents of each file as such     */
+                /* In the case where more than one file is examined, we  */
+                /* label the relevant contents of each file as such      */
                 if (numFiles > 1) {
                         if ((print || printAll)) {
                                 fprintf(stdout, "\n--|%d: %s|--\n",
@@ -238,7 +244,8 @@ int main(int argc, char **argv)
                         // Real life counting is 1-indexed
                         ++line;
 
-                        /* Don't process blank lines for violations  */
+                        /* Don't process blank lines for violations,  */
+                        /* but do print them when printing files      */
                         if (len == 1 && !printAll) continue;
 
                         /* Print lines that fit none, either, or any */
@@ -268,7 +275,6 @@ int main(int argc, char **argv)
                                                 term_red();
                                         else term_green();
                                 }
-                                
                                 fprintf(stdout, " [%3u]", (unsigned) len);
                                 if (color) term_default();
                         }
@@ -281,7 +287,7 @@ int main(int argc, char **argv)
                         bool overMinLen = false;
                         index = 0;
 
-                        /* Yes, I know this is stupid. Trust me. */
+                        /* Yes, I know this looks stupid. Trust me. */
                         for (charCount = 0; charCount < (len - 1) &&
                                             index < (len - 1); ++index) {
 
@@ -300,7 +306,8 @@ int main(int argc, char **argv)
                                 /* Only turn green once we pass minLen, but */
                                 /* don't turn green if only printing lines  */
                                 /* out of tolerance - not relevant there    */
-                                if (!overMinLen && (charCount >= (minLen - 1))){
+                                if (!overMinLen &&
+                                    (charCount >= (minLen - 1))) {
                                         if (print || printAll || !offenders) {
                                                 overMinLen = true;
                                                 if ((print || printAll)
@@ -348,135 +355,137 @@ int main(int argc, char **argv)
         return violated ? EXIT_FAILURE : EXIT_SUCCESS;
 }
 
-void parseArgs(int argc, char **argv, int *i)
+int parseArgs(int argc, char **argv)
 {
-        for (*i = 1; argv[*i] != NULL; ++(*i)) {
-                if (MATCH_S(*i, 0, OPTION)){
+        int i;
+        for (i = 1; argv[i] != NULL; ++(i)) {
+                if (MATCH_S(i, 0, OPTION)){
                         /* A floating READ_STDIN in the middle of other */
                         /* options is not acceptable */
-                        if ((*i != argc - 1) && MATCH_S(*i, 1, NULLCHAR)) {
+                        if ((i != argc - 1) && MATCH_S(i, 1, NULLCHAR)) {
                                 fprintf(stderr, "%s [%s]\n", BAD_OPTION,
-                                        argv[*i]);
+                                        argv[i]);
                                 exit(WHAT_IS_THAT_FLAG);
                         }
-                        if (MATCH_S(*i, 1, OPTION)){ /* Long form options */
-                                if (MATCH_L(*i, MAX_LONG)) {
-                                        ARG_CHECK(*i);
-                                        maxLen = strtol(argv[*i],
+                        if (MATCH_S(i, 1, OPTION)){ /* Long form options */
+                                if (MATCH_L(i, MAX_LONG)) {
+                                        ARG_CHECK(i);
+                                        maxLen = strtol(argv[i],
                                                         (char **)NULL, 10);
-                                } else if (MATCH_L(*i, MIN_LONG)) {
-                                        ARG_CHECK(*i);
-                                        minLen = strtol(argv[*i],
+                                } else if (MATCH_L(i, MIN_LONG)) {
+                                        ARG_CHECK(i);
+                                        minLen = strtol(argv[i],
                                                  (char **)NULL, 10);
-                                } else if (MATCH_L(*i, TABWIDTH_LONG)) {
-                                        ARG_CHECK(*i);
-                                        tabWidth = strtol(argv[*i],
+                                } else if (MATCH_L(i, TABWIDTH_LONG)) {
+                                        ARG_CHECK(i);
+                                        tabWidth = strtol(argv[i],
                                                          (char **)NULL, 10);
-                                } else if (MATCH_L(*i, MATCHES_LONG)) {
+                                } else if (MATCH_L(i, MATCHES_LONG)) {
                                         if (offenders) printAll = true;
                                         if (!print) {
                                                 print = true;
                                                 offenders = false;
                                         }
-                                } else if (MATCH_L(*i, OFFENDERS_LONG)) {
+                                } else if (MATCH_L(i, OFFENDERS_LONG)) {
                                         if (!offenders) printAll = true;
                                         if (!print) {
                                                 print = true;
                                                 offenders = true;
                                         }
-                                } else if (MATCH_L(*i, LINE_NUMS_LONG)) {
+                                } else if (MATCH_L(i, LINE_NUMS_LONG)) {
                                         lineNums = true;
-                                } else if (MATCH_L(*i, TRUNCATE_LONG)) {
+                                } else if (MATCH_L(i, TRUNCATE_LONG)) {
                                         truncate = true;
-                                } else if (MATCH_L(*i, COLOR_LONG)) {
+                                } else if (MATCH_L(i, COLOR_LONG)) {
                                         color = true;
-                                } else if (MATCH_L(*i, FLAGS_LONG)) {
+                                } else if (MATCH_L(i, FLAGS_LONG)) {
                                         flags = true;
-                                } else if (MATCH_L(*i, LINE_LENGTHS_LONG)) {
+                                } else if (MATCH_L(i, LINE_LENGTHS_LONG)) {
                                         lineLengths = true;
-                                } else if (MATCH_L(*i, HELP_LONG)) {
+                                } else if (MATCH_L(i, HELP_LONG)) {
                                         fprintf(stdout, "%s\n", HELP_ME);
                                         exit(EXIT_SUCCESS);
                                 /* Unrecognized option */
                                 } else {
                                         fprintf(stderr, "%s [%s]\n",
-                                                BAD_OPTION, argv[*i]);
+                                                BAD_OPTION, argv[i]);
                                         exit(WHAT_IS_THAT_FLAG);
                                 }
                         }
 
                         /* Loop through for short form options */
-                        else for (int j = 1; j < (int) strlen(argv[*i]); ++j) {
+                        else for (int j = 1; j < (int) strlen(argv[i]); ++j) {
                         /* max cannot be combined with other options */
-                        if (MATCH_S(*i, j, MAX)) {
-                                if ((j == 1) && (argv[*i][j + 1] == NULLCHAR)) {
-                                        ARG_CHECK(*i);
-                                        maxLen = strtol(argv[*i],
+                        if (MATCH_S(i, j, MAX)) {
+                                if ((j == 1) && (argv[i][j + 1] == NULLCHAR)) {
+                                        ARG_CHECK(i);
+                                        maxLen = strtol(argv[i],
                                                  (char **)NULL, 10);
                                 }
                                 else {
                                         fprintf(stderr, "%s [%c]\n",
-                                                NO_COMBINE, argv[*i][j]);
+                                                NO_COMBINE, argv[i][j]);
                                         exit(BAD_COMBINE);
                                 }
                         /* min cannot be combined with other options */
-                        } else if (MATCH_S(*i, j, MIN)) {
-                                if ((j == 1) && (argv[*i][j + 1] == NULLCHAR)) {
-                                        ARG_CHECK(*i);
-                                        minLen = strtol(argv[*i],
+                        } else if (MATCH_S(i, j, MIN)) {
+                                if ((j == 1) && (argv[i][j + 1] == NULLCHAR)) {
+                                        ARG_CHECK(i);
+                                        minLen = strtol(argv[i],
                                                  (char **)NULL, 10);
                                 }
                                 else {
                                         fprintf(stderr, "%s [%c]\n",
-                                                NO_COMBINE, argv[*i][j]);
+                                                NO_COMBINE, argv[i][j]);
                                         exit(BAD_COMBINE);
                                 }
                         /* tab-width cannot be combined with other options */
-                        } else if (MATCH_S(*i, j, TABWIDTH)) {
-                                if ((j == 1) && (argv[*i][j + 1] == NULLCHAR)) {
-                                        ARG_CHECK(*i);
-                                        tabWidth = strtol(argv[*i],
+                        } else if (MATCH_S(i, j, TABWIDTH)) {
+                                if ((j == 1) && (argv[i][j + 1] == NULLCHAR)) {
+                                        ARG_CHECK(i);
+                                        tabWidth = strtol(argv[i],
                                                    (char **)NULL, 10);
                                 }
                                 else {
                                         fprintf(stderr, "%s [%c]\n",
-                                                NO_COMBINE, argv[*i][j]);
+                                                NO_COMBINE, argv[i][j]);
                                         exit(BAD_COMBINE);
                                 }
                         /* printAll overrides the offenders when set */
-                        } else if (MATCH_S(*i, j, MATCHES)) {
+                        } else if (MATCH_S(i, j, MATCHES)) {
                                 if (print) printAll = true;
                                 if (!print) {
                                         print = true;
                                         offenders = false;
                                 }
-                        } else if (MATCH_S(*i, j, OFFENDERS)) {
+                        } else if (MATCH_S(i, j, OFFENDERS)) {
                                 if (print) printAll = true;
                                 if (!print) {
                                         print = true;
                                         offenders = true;
                                 }
-                        } else if (MATCH_S(*i, j, LINE_NUMS)) {
+                        } else if (MATCH_S(i, j, LINE_NUMS)) {
                                 lineNums = true;
-                        } else if (MATCH_S(*i, j, TRUNCATE)) {
+                        } else if (MATCH_S(i, j, TRUNCATE)) {
                                 truncate = true;
-                        } else if (MATCH_S(*i, j, COLOR)) {
+                        } else if (MATCH_S(i, j, COLOR)) {
                                 color = true;
-                        } else if (MATCH_S(*i, j, LINE_LENGTHS)) {
+                        } else if (MATCH_S(i, j, LINE_LENGTHS)) {
                                 lineLengths = true;
-                        } else if (MATCH_S(*i, j, HELP)) {
+                        } else if (MATCH_S(i, j, HELP)) {
                                 fprintf(stdout, "%s\n", HELP_ME);
                                 exit(EXIT_SUCCESS);
                         /* Unrecognized option */
                         } else {
                                 fprintf(stderr, "%s [%s]\n", BAD_OPTION,
-                                        argv[*i]);
+                                        argv[i]);
                                 exit(WHAT_IS_THAT_FLAG);
                         }
                 /* I still have no idea which set of braces I didn't close */
                 /* properly                                                */
                 } } else break;
         }
+        return i;
 }
 
  /* Print all flags to check if they're set correctly */
@@ -562,7 +571,8 @@ size_t my_getline(char **buf, size_t *size, FILE *fd)
                                                         return (size_t) -1;
                                         }
                                         for (size_t q = i;
-                                             q < i + MY_GETLINE_TABWIDTH; ++q) {
+                                             q < i + MY_GETLINE_TABWIDTH;
+                                             ++q) {
                                                 (*buf)[q] = ' ';
                                         }
                                         i += MY_GETLINE_TABWIDTH - 1;
