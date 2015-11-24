@@ -20,6 +20,8 @@ Feel free to glance at the spaghetti code that is the source code. A short descr
 <samp>len</samp> returns 0 when all lines inspected had lengths within the specified/default range.
 <samp>len</samp> returns 1 when at least one line inspected had a length outside the specified/default range.
 
+Other return values indicate errors.
+
 <hr>
 <h4>Other Capabilities</h4>
 len is capable of displaying lines from all files it processed and some information about those lines.
