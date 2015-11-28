@@ -194,9 +194,6 @@ int main(int argc, char **argv)
                 if (numFiles == 0) {
                         fd = stdin;
                         i--;
-                } else {
-                        fprintf(stderr, "%s\n", BAD_STDIN);
-                        exit(BAD_ARGS);
                 }
         }
 
@@ -212,7 +209,9 @@ int main(int argc, char **argv)
 
         /* Process each remaining argument as a filename */
         for (; i < argc; ++i) {
-                if (fd != stdin) fd = fopen(argv[i], "r");
+                // if (fd != stdin) fd = fopen(argv[i], "r");
+                if (argv[i][0] == READ_STDIN) fd = stdin;
+                else fd = fopen(argv[i], "r");
                 if (fd == NULL){
                         fprintf(stderr, "%s %s %s\n", "Could not open file",
                                                       argv[argc - 1],
@@ -226,9 +225,16 @@ int main(int argc, char **argv)
                 /* label the relevant contents of each file as such      */
                 if (numFiles > 1) {
                         if ((print || printAll)) {
-                                fprintf(stdout, "\n--|%d: %s|--\n",
-                                        numFiles - (argc - i) + 1,
-                                        argv[i]);
+                                if (fd != stdin){
+                                        fprintf(stdout, "\n--|%d: %s|--\n",
+                                                numFiles - (argc - i) + 1,
+                                                argv[i]);
+                                }
+                                else {
+                                        fprintf(stdout, "\n--|%d: %s|--\n",
+                                                numFiles - (argc - i) + 1,
+                                                "Standard Input");
+                                }
                         }
                 }
 
@@ -360,13 +366,11 @@ int parseArgs(int argc, char **argv)
         int i;
         for (i = 1; argv[i] != NULL; ++(i)) {
                 if (MATCH_S(i, 0, OPTION)){
-                        /* A floating READ_STDIN in the middle of other */
-                        /* options is not acceptable */
-                        if ((i != argc - 1) && MATCH_S(i, 1, NULLCHAR)) {
-                                fprintf(stderr, "%s [%s]\n", BAD_OPTION,
-                                        argv[i]);
-                                exit(WHAT_IS_THAT_FLAG);
-                        }
+                        // /* A leading stdin is not acceptable */
+                        // if ((i != argc - 1) && MATCH_S(i, 1, NULLCHAR)) {
+                        //         fprintf(stderr, "%s\n", BAD_STDIN);
+                        //         exit(BAD_ARGS);
+                        // }
                         if (MATCH_S(i, 1, OPTION)){ /* Long form options */
                                 if (MATCH_L(i, MAX_LONG)) {
                                         ARG_CHECK(i);
