@@ -107,19 +107,19 @@ const int       WHAT_IS_THAT_FLAG       = 251;
 const int       BAD_COMBINE             = 250;
 
 /* Default values */
-unsigned        maxLen          = 80;
-unsigned        minLen          = 1; /* Empty lines are 1 character long */
-unsigned        tabWidth        = 8;
+static unsigned        maxLen          = 80;
+static unsigned        minLen          = 1; /* Empty lines are 1 char long */
+static unsigned        tabWidth        = 8;
 
 /* Behavior flags controlled by args to program */
-bool            print           = false;
-bool            printAll        = false;
-bool            offenders       = true;   /* Has no effect without print */
-bool            lineNums        = false;
-bool            color           = false;
-bool            flags           = false;
-bool            truncate        = false;
-bool            lineLengths     = false;
+static bool            print           = false;
+static bool            printAll        = false;
+static bool            offenders       = true;   /* No effect without print */
+static bool            lineNums        = false;
+static bool            color           = false;
+static bool            flags           = false;
+static bool            truncate        = false;
+static bool            lineLengths     = false;
 
 /****************************************************************************/
 
@@ -209,7 +209,6 @@ int main(int argc, char **argv)
 
         /* Process each remaining argument as a filename */
         for (; i < argc; ++i) {
-                // if (fd != stdin) fd = fopen(argv[i], "r");
                 if (argv[i][0] == READ_STDIN) fd = stdin;
                 else fd = fopen(argv[i], "r");
                 if (fd == NULL){
@@ -366,11 +365,6 @@ int parseArgs(int argc, char **argv)
         int i;
         for (i = 1; argv[i] != NULL; ++(i)) {
                 if (MATCH_S(i, 0, OPTION)){
-                        // /* A leading stdin is not acceptable */
-                        // if ((i != argc - 1) && MATCH_S(i, 1, NULLCHAR)) {
-                        //         fprintf(stderr, "%s\n", BAD_STDIN);
-                        //         exit(BAD_ARGS);
-                        // }
                         if (MATCH_S(i, 1, OPTION)){ /* Long form options */
                                 if (MATCH_L(i, MAX_LONG)) {
                                         ARG_CHECK(i);
