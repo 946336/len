@@ -529,6 +529,7 @@ size_t my_getline(char **buf, size_t *size, FILE *fd)
         static const int INIT_SIZE = 256;
         static const char DELIM1 = '\n';
         static const char DELIM2 = '\r';
+        static const char NULLCHAR = '\0';
 
         if (size == NULL) return (size_t) -1;
 
