@@ -354,7 +354,7 @@ int main(int argc, char **argv)
         }
 
         /* Extra newline at end of output for visual clarity */
-        fprintf(stdout, "\n");
+        if (print || printAll) fprintf(stdout, "\n");
 
         free(buf);
         return violated ? EXIT_FAILURE : EXIT_SUCCESS;
