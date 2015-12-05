@@ -213,8 +213,7 @@ int main(int argc, char **argv)
                 else fd = fopen(argv[i], "r");
                 if (fd == NULL){
                         fprintf(stderr, "%s %s %s\n", "Could not open file",
-                                                      argv[argc - 1],
-                                                      "for reading");
+                                                      argv[i], "for reading");
                         exit(BAD_FILE);
                 }
 
@@ -264,7 +263,7 @@ int main(int argc, char **argv)
                                 if (offenders && !printAll) continue;
                         }
 
-                        /* Line numbers up to 10^7 - 1. If your files is   */
+                        /* Line numbers up to 10^7 - 1. If your files are  */
                         /* longer than that, you have bigger problems than */
                         /* the output from this program not lining up      */
                         if ((print || printAll) && lineNums) fprintf(stdout,
@@ -272,7 +271,7 @@ int main(int argc, char **argv)
                                                              (unsigned long)
                                                              line);
 
-                        /* Line lengths up to 10^3 - 1. If your  lines are */
+                        /* Line lengths up to 10^3 - 1. If your lines are  */
                         /* longer than that, you have other problems.      */
                         if ((print || printAll) && lineLengths) {
                                 if ((color) && (len != 1)){
