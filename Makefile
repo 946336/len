@@ -10,4 +10,4 @@ len: len.c
 	$(CC) $(CFLAGS) $(OPTIMIZE) $^ -o $@
 
 len-debug: len.c
-	$(CC) $(CFLAGS) $(OPTIMIZE) $(DEBUG) $^ -o $@
+	$(CC) $(CFLAGS) $(DEBUG) $^ -o $@
