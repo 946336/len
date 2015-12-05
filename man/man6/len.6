@@ -1,5 +1,5 @@
 .\" Manpage for len.
-.TH man 6 "8 November 2015" "1.1" "Nonstandard Utility: \fBlen\fR"
+.TH man 6 "4 December 2015" "1.1" "Nonstandard Utility: \fBlen\fR"
 .SH NAME
 .PP
 \fBlen\fR \- ensure the line lengths of a plaintext file are within a certain range. Originally intended for source code.
@@ -105,6 +105,8 @@ No options or arguments given to program
 .SH KNOWN ISSUES
 .PP
 \fBlen\fR does not ignore lines comprised solely of whitespace save for lines containing a single newline
+.PP
+\fBlen\fR will not warn you when you are attempting to analyze binary files.
 .SH AUTHOR
 .PP
 Written by Wesley Wei
