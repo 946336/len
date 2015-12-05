@@ -8,13 +8,13 @@
 .PP
 \fBlen\fR \-\-help
 .TP
-\fBlen\fR [\fIOPTIONS\fR] \fI[FILE]\fR
+\fBlen\fR [\fIOPTIONS\fR] \fIFILES\fR
 .SH DESCRIPTION
 .PP
 Scan through text files and check if the lengths of all lines (delimited by newline characters) are within a certain range.
 \fBlen\fR can process multiple files in a single invocation.
 .PP
-Specify [\fI\-\fR] in place of [\fIFILE\fR] to read from \fBstdin\fR.
+Specify \fI\-\fR in place of \fIFILE\fR to read from \fBstdin\fR.
 .PP
 By default,\fBlen\fR does not produce any output.
 .PP
@@ -56,27 +56,26 @@ Displays line lengths. Has no effect unless one or both of \-p and \-P are speci
 Display help and exit.
 .SH EXAMPLES
 .TP
-.B \fBlen\fR \fIFILE\fR
+\fBlen\fR \fIFILE\fR
 Checks \fIFILE\fR to make sure all lines are between 1 and 80 characters long (default behavior).
 .TP
-\fBlen\fR [\fB\-m\fR \fIMAX\fR] [\fB\-M\fR \fIMIN\fR] \fIFILE\fR
+\fBlen\fR \fIFILE1\fR \fIFILE2\fR \fI...\fR
+Checks that all lines in all files named are within tolerance.
+.TP
+\fBlen\fR \fB\-m\fR \fIMAX\fR \fB\-M\fR \fIMIN\fR \fIFILE\fR
 Checks FILE to make sure all lines are between MIN and MAX characters long.
 .TP
-\fBlen\fR [\fI\-np\fR] \fIFILE\fR
+\fBlen\fR \fB\-np\fR \fIFILE\fR
 Checks \fIFILE\fR, prints all lines that are out of tolerance, and gives line
 numbers
 .TP
-\fBlen\fR [\fI\-ncp\fR] \fIFILE\fR
-Same as above, but uses colors to help visualize how far out of tolerance
-each line is.
+\fBlen\fR \fB\-npr\fR \fIFILE\fR
+Truncates long lines instead of showing full lines.
 .TP
-\fBlen\fR [\fI\-ncpr\fR] \fIFILE\fR
-Same as above, but truncates long lines instead of showing full lines.
-.TP
-\fBlen\fR [\fI\-P\fR] \fIFILE\fR
+\fBlen\fR \fB\-P\fR \fIFILE\fR
 Checks \fIFILE\fR and prints out all lines whose lengths are within tolerance.
 .TP
-\fBlen\fR [\fI\-pP\fR] \fIFILE\fR
+\fBlen\fR \fB\-pP\fR \fIFILE\fR
 Checks \fIFILE\fR and prints out the entire contents of \fIFILE\fR.
 .SH EXIT STATUS
 .TP
