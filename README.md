@@ -7,7 +7,9 @@ By default, <samp>len</samp> does not produce any output on stdout or stderr.
 
 When piping output from <samp>len</samp> to <samp>less</samp>, be sure to specify <samp>-r</samp> with <samp>less</samp> if you want colors to be displayed properly.
 
-Feel free to glance at the spaghetti code that is the source code. A short description of the options that <samp>len</samp> recognizes is near the top of <samp>len.c</samp>.
+Feel free to glance at the spaghetti code that is the source code - I've tried to leave helpful comments, but those can only go so far.
+
+A short description of the options that <samp>len</samp> recognizes is near the top of <samp>len.c</samp>.
 
 <hr>
 <h4>Compiling</h4>
