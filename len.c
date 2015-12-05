@@ -246,7 +246,7 @@ int main(int argc, char **argv)
                 /* Assignment evaluates to the value assigned */
                 while((len = my_getline(&buf, &size, fd)) !=
                                         (unsigned long) -1) {
-                        // Real life counting is 1-indexed
+                        /* Real life counting is 1-indexed */
                         ++line;
 
                         /* Don't process blank lines for violations,  */
