@@ -184,6 +184,7 @@ int main(int argc, char **argv)
         /* These must persist and are set for each file examined */
         FILE *fd = NULL;
         char *buf = NULL;
+        size_t size = 0;
 
         if (flags) print_flags(i, argc);
 
@@ -213,7 +214,8 @@ int main(int argc, char **argv)
                 else fd = fopen(argv[i], "r");
                 if (fd == NULL){
                         fprintf(stderr, "%s %s %s\n", "Could not open file",
-                                                      argv[i], "for reading");
+                                                      argv[argc - 1],
+                                                      "for reading");
                         exit(BAD_FILE);
                 }
 
@@ -236,7 +238,6 @@ int main(int argc, char **argv)
                         }
                 }
 
-                size_t size = 0;
                 size_t line = 0;
                 size_t len = -1;
                 size_t index = 0;
@@ -263,7 +264,7 @@ int main(int argc, char **argv)
                                 if (offenders && !printAll) continue;
                         }
 
-                        /* Line numbers up to 10^7 - 1. If your files are  */
+                        /* Line numbers up to 10^7 - 1. If your files is   */
                         /* longer than that, you have bigger problems than */
                         /* the output from this program not lining up      */
                         if ((print || printAll) && lineNums) fprintf(stdout,
@@ -271,7 +272,7 @@ int main(int argc, char **argv)
                                                              (unsigned long)
                                                              line);
 
-                        /* Line lengths up to 10^3 - 1. If your lines are  */
+                        /* Line lengths up to 10^3 - 1. If your  lines are */
                         /* longer than that, you have other problems.      */
                         if ((print || printAll) && lineLengths) {
                                 if ((color) && (len != 1)){
@@ -545,7 +546,7 @@ size_t my_getline(char **buf, size_t *size, FILE *fd)
         do {
                 if ((i + 2) >= *size){
                         *buf = realloc(*buf, 2 * (*size) + 1);
-                        *size += 2;
+                        *size *= 2;
                         if (*buf == NULL) {
                                 return (size_t) -1;
                         }
@@ -568,7 +569,8 @@ size_t my_getline(char **buf, size_t *size, FILE *fd)
                         /* Windows line eendings    \r\n */
                         #if defined(MY_GETLINE_TABWIDTH)
                                 if ((*buf)[i] == TAB) {
-                                        if (*size <= i + MY_GETLINE_TABWIDTH) {
+                                        if (*size <=
+                                            i + MY_GETLINE_TABWIDTH + 1) {
                                                 *buf = realloc(*buf,
                                                               2 * (*size) + 1);
                                                 *size *= 2;
