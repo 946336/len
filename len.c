@@ -544,6 +544,14 @@ size_t my_getline(char **buf, size_t *size, FILE *fd)
 
         char peeking;
         do {
+                if ((i + 2) >= *size){
+                        *buf = realloc(*buf, 2 * (*size) + 1);
+                        *size += 2;
+                        if (*buf == NULL) {
+                                return (size_t) -1;
+                        }
+                }
+
                 c = fgetc(fd);
                 /* Lines that are actually blank (no newline at all) are */
                 /* reported as invalid. Should only happen in an empty   */
@@ -554,7 +562,6 @@ size_t my_getline(char **buf, size_t *size, FILE *fd)
                                 return (size_t) -1;
                         }
                 }
-
                 else {
                         (*buf)[i] = c;
                         /* UNIX line endings:       \n   */
@@ -585,13 +592,6 @@ size_t my_getline(char **buf, size_t *size, FILE *fd)
                                                 ungetc(peeking, fd);
                                 (*buf)[++i] = NULLCHAR;
                                 return i;
-                        }
-                }
-                if ((i++ + 1) >= *size){
-                        *buf = realloc(*buf, 2 * (*size) + 1);
-                        *size += 2;
-                        if (*buf == NULL) {
-                                return (size_t) -1;
                         }
                 }
         } while(c > 0); /* EOF returns a negative value */
