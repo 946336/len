@@ -552,6 +552,14 @@ size_t my_getline(char **buf, size_t *size, FILE *fd)
 
         char peeking;
         do {
+                if ((i + 2) >= *size){
+                        *buf = realloc(*buf, 2 * (*size) + 1);
+                        *size *= 2;
+                        if (*buf == NULL) {
+                                return (size_t) -1;
+                        }
+                }
+
                 c = fgetc(fd);
                 if ((i + 2) >= *size){
                         *buf = realloc(*buf, 2 * (*size) + 1);
@@ -570,7 +578,6 @@ size_t my_getline(char **buf, size_t *size, FILE *fd)
                                 return (size_t) -1;
                         }
                 }
-
                 else {
                         (*buf)[i] = c;
                         /* UNIX line endings:       \n   */
@@ -578,7 +585,8 @@ size_t my_getline(char **buf, size_t *size, FILE *fd)
                         /* Windows line eendings    \r\n */
                         #if defined(MY_GETLINE_TABWIDTH)
                                 if ((*buf)[i] == TAB) {
-                                        if (*size <= i + MY_GETLINE_TABWIDTH) {
+                                        if (*size <=
+                                            i + MY_GETLINE_TABWIDTH + 1) {
                                                 *buf = realloc(*buf,
                                                               2 * (*size) + 1);
                                                 *size *= 2;
