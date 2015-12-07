@@ -184,6 +184,7 @@ int main(int argc, char **argv)
         /* These must persist and are set for each file examined */
         FILE *fd = NULL;
         char *buf = NULL;
+        size_t size = 0;
 
         if (flags) print_flags(i, argc);
 
@@ -237,7 +238,6 @@ int main(int argc, char **argv)
                         }
                 }
 
-                size_t size = 0;
                 size_t line = 0;
                 size_t len = -1;
                 size_t index = 0;
@@ -245,7 +245,7 @@ int main(int argc, char **argv)
 
                 /* Assignment evaluates to the value assigned */
                 while((len = my_getline(&buf, &size, fd)) !=
-                                        (unsigned long) -1) {
+                                        (size_t) -1) {
                         /* Real life counting is 1-indexed */
                         ++line;
 
@@ -370,14 +370,17 @@ int parseArgs(int argc, char **argv)
                                         ARG_CHECK(i);
                                         maxLen = strtol(argv[i],
                                                         (char **)NULL, 10);
+                                        break;
                                 } else if (MATCH_L(i, MIN_LONG)) {
                                         ARG_CHECK(i);
                                         minLen = strtol(argv[i],
                                                  (char **)NULL, 10);
+                                        break;
                                 } else if (MATCH_L(i, TABWIDTH_LONG)) {
                                         ARG_CHECK(i);
                                         tabWidth = strtol(argv[i],
                                                          (char **)NULL, 10);
+                                        break;
                                 } else if (MATCH_L(i, MATCHES_LONG)) {
                                         if (offenders) printAll = true;
                                         if (!print) {
@@ -412,13 +415,15 @@ int parseArgs(int argc, char **argv)
                         }
 
                         /* Loop through for short form options */
-                        else for (int j = 1; j < (int) strlen(argv[i]); ++j) {
+                        else for (int j = 1; argv[i][j] != '\0'; ++j) {
                         /* max cannot be combined with other options */
                         if (MATCH_S(i, j, MAX)) {
                                 if ((j == 1) && (argv[i][j + 1] == NULLCHAR)) {
                                         ARG_CHECK(i);
                                         maxLen = strtol(argv[i],
                                                  (char **)NULL, 10);
+                                        fprintf(stderr, "[%d]\n", maxLen);
+                                        break;
                                 }
                                 else {
                                         fprintf(stderr, "%s [%c]\n",
@@ -431,6 +436,7 @@ int parseArgs(int argc, char **argv)
                                         ARG_CHECK(i);
                                         minLen = strtol(argv[i],
                                                  (char **)NULL, 10);
+                                        break;
                                 }
                                 else {
                                         fprintf(stderr, "%s [%c]\n",
@@ -443,6 +449,7 @@ int parseArgs(int argc, char **argv)
                                         ARG_CHECK(i);
                                         tabWidth = strtol(argv[i],
                                                    (char **)NULL, 10);
+                                        break;
                                 }
                                 else {
                                         fprintf(stderr, "%s [%c]\n",
@@ -479,9 +486,10 @@ int parseArgs(int argc, char **argv)
                                         argv[i]);
                                 exit(WHAT_IS_THAT_FLAG);
                         }
-                /* I still have no idea which set of braces I didn't close */
-                /* properly                                                */
-                } } else break;
+                        /* I still have no idea which set of braces I didn't */
+                        /* close properly                                    */
+                        }
+                } else break;
         }
         return i;
 }
@@ -545,6 +553,14 @@ size_t my_getline(char **buf, size_t *size, FILE *fd)
         char peeking;
         do {
                 c = fgetc(fd);
+                if ((i + 2) >= *size){
+                        *buf = realloc(*buf, 2 * (*size) + 1);
+                        *size *= 2;
+                        fprintf(stderr, "Size increased to %lu\n", *size);
+                        if (*buf == NULL) {
+                                return (size_t) -1;
+                        }
+                }
                 /* Lines that are actually blank (no newline at all) are */
                 /* reported as invalid. Should only happen in an empty   */
                 /* file.                                                 */
@@ -586,13 +602,7 @@ size_t my_getline(char **buf, size_t *size, FILE *fd)
                                 (*buf)[++i] = NULLCHAR;
                                 return i;
                         }
-                }
-                if ((i++ + 1) >= *size){
-                        *buf = realloc(*buf, 2 * (*size) + 1);
-                        *size += 2;
-                        if (*buf == NULL) {
-                                return (size_t) -1;
-                        }
+                        ++i;
                 }
         } while(c > 0); /* EOF returns a negative value */
 
