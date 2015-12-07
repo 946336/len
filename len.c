@@ -350,7 +350,7 @@ int main(int argc, char **argv)
                                 fprintf(stdout, "%c", '\n');
                 }
 
-                fclose(fd);
+                if (fd != stdin) fclose(fd);
         }
 
         /* Extra newline at end of output for visual clarity */
