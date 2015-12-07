@@ -298,8 +298,9 @@ int main(int argc, char **argv)
 
                                 /* Only turn red once we pass maxLen, but */
                                 /* we have to remember that the length    */
-                                /* includes the terminating nullchar      */                            
-                                if (!overMaxLen && charCount >= (maxLen - 1)){
+                                /* counts the newline as a single char    */
+                                /* and drops it in favor of a nullchar    */
+                                if (!overMaxLen && charCount >= (maxLen - 1)) {
                                         overMaxLen = true;
                                         if ((print || printAll) && color)
                                                 term_red();
