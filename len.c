@@ -422,7 +422,6 @@ int parseArgs(int argc, char **argv)
                                         ARG_CHECK(i);
                                         maxLen = strtol(argv[i],
                                                  (char **)NULL, 10);
-                                        fprintf(stderr, "[%d]\n", maxLen);
                                         break;
                                 }
                                 else {
