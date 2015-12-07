@@ -296,8 +296,10 @@ int main(int argc, char **argv)
                         for (charCount = 0; charCount < (len - 1) &&
                                             index < (len - 1); ++index) {
 
-                                /* Only turn red once we pass maxLen */
-                                if (!overMaxLen && charCount >= maxLen){
+                                /* Only turn red once we pass maxLen, but */
+                                /* we have to remember that the length    */
+                                /* includes the terminating nullchar      */                            
+                                if (!overMaxLen && charCount >= (maxLen - 1)){
                                         overMaxLen = true;
                                         if ((print || printAll) && color)
                                                 term_red();
