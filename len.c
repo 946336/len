@@ -365,6 +365,9 @@ int parseArgs(int argc, char **argv)
         int i;
         for (i = 1; argv[i] != NULL; ++(i)) {
                 if (MATCH_S(i, 0, OPTION)){
+                        if (MATCH_S(i, 1, NULLCHAR)) {
+                                return i;
+                        }                        
                         if (MATCH_S(i, 1, OPTION)){ /* Long form options */
                                 if (MATCH_L(i, MAX_LONG)) {
                                         ARG_CHECK(i);
@@ -485,8 +488,7 @@ int parseArgs(int argc, char **argv)
                                         argv[i]);
                                 exit(WHAT_IS_THAT_FLAG);
                         }
-                        /* I still have no idea which set of braces I didn't */
-                        /* close properly                                    */
+
                         }
                 } else break;
         }
