@@ -299,7 +299,6 @@ int main(int argc, char **argv)
                                 /* Only turn red once we pass maxLen, but */
                                 /* we have to remember that the length    */
                                 /* counts the newline as a single char    */
-                                /* and drops it in favor of a nullchar    */
                                 if (!overMaxLen && charCount >= (maxLen - 1)) {
                                         overMaxLen = true;
                                         if ((print || printAll) && color)
@@ -621,3 +620,5 @@ size_t my_getline(char **buf, size_t *size, FILE *fd)
         (*buf)[i] = NULLCHAR;
         return i;
 }
+
+
