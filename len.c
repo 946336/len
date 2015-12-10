@@ -294,8 +294,8 @@ int main(int argc, char **argv)
                         index = 0;
 
                         /* Yes, I know this looks stupid. Trust me. */
-                        for (charCount = 0; charCount < (len - 1) &&
-                                            index < (len - 1); ++index) {
+                        for (charCount = 0; charCount < (len) &&
+                                            index < (len); ++index) {
 
                                 /* Only turn red once we pass maxLen, but */
                                 /* we have to remember that the length    */
@@ -349,7 +349,7 @@ int main(int argc, char **argv)
                         /* The last character should be a newline. We take */
                         /* this opporunity to reset terminal text color.   */
                         if ((print || printAll) && color) term_default();
-                        if ((print || printAll))
+                        if ((print || printAll) && buf[len - 1] != '\n')
                                 fprintf(stdout, "%c", '\n');
                 }
 
@@ -599,13 +599,15 @@ size_t my_getline(char **buf, size_t *size, FILE *fd)
                                         }
                                         #if defined(MY_GETLINE_TABSTOPS)
                                         int dst_to_tabstop =
-                                                i / MY_GETLINE_TABWIDTH;
+                                                ((i % MY_GETLINE_TABWIDTH) ? 
+                                                (i % MY_GETLINE_TABWIDTH) :
+                                                MY_GETLINE_TABWIDTH);
                                         for (size_t q = i;
                                              q < i + dst_to_tabstop;
                                              ++q) {
                                                 (*buf)[q] = ' ';
                                         }
-                                        i += dst_to_tabstop;
+                                        i += dst_to_tabstop - 1;
                                         #else
                                         for (size_t q = i;
                                              q < i + MY_GETLINE_TABWIDTH;
