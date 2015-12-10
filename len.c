@@ -8,6 +8,7 @@
 #include <string.h>
 
 #define MY_GETLINE_TABWIDTH tabWidth
+#define MY_GETLINE_TABSTOPS true
 
 /*******************************CONSTANTS************************************/
 
@@ -596,12 +597,23 @@ size_t my_getline(char **buf, size_t *size, FILE *fd)
                                                 if (*buf == NULL)
                                                         return (size_t) -1;
                                         }
+                                        #if defined(MY_GETLINE_TABSTOPS)
+                                        int dst_to_tabstop =
+                                                i / MY_GETLINE_TABWIDTH;
+                                        for (size_t q = i;
+                                             q < i + dst_to_tabstop;
+                                             ++q) {
+                                                (*buf)[q] = ' ';
+                                        }
+                                        i += dst_to_tabstop;
+                                        #else
                                         for (size_t q = i;
                                              q < i + MY_GETLINE_TABWIDTH;
                                              ++q) {
                                                 (*buf)[q] = ' ';
                                         }
                                         i += MY_GETLINE_TABWIDTH - 1;
+                                        #endif
                                 }
                         #endif
                         /* UNIX or OS9 */
