@@ -211,11 +211,17 @@ int main(int argc, char **argv)
 
         /* Process each remaining argument as a filename */
         for (; i < argc; ++i) {
-                if (argv[i][0] == READ_STDIN) fd = stdin;
+                if (argv[i][0] == READ_STDIN) {
+                        if (argv[i][1] == '\0')
+                                fd = stdin;
+                        else {
+                                fd = NULL;
+                        }
+                }
                 else fd = fopen(argv[i], "r");
                 if (fd == NULL){
                         fprintf(stderr, "%s %s %s\n", "Could not open file",
-                                                      argv[argc - 1],
+                                                      argv[i],
                                                       "for reading");
                         exit(BAD_FILE);
                 }
@@ -538,7 +544,7 @@ inline static void term_default()
 /* \t with however many spaces MY_GETLINE_TABWIDTH evaluates to   */
 size_t my_getline(char **buf, size_t *size, FILE *fd)
 {
-        static const int INIT_SIZE = 256;
+        static const int  INIT_SIZE = 256;
         static const char DELIM1 = '\n';
         static const char DELIM2 = '\r';
         static const char NULLCHAR = '\0';
