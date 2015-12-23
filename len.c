@@ -300,8 +300,8 @@ int main(int argc, char **argv)
                         index = 0;
 
                         /* Yes, I know this looks stupid. Trust me. */
-                        for (charCount = 0; charCount < (len) &&
-                                            index < (len); ++index) {
+                        for (charCount = 0; charCount < (len - 1) &&
+                                            index < (len - 1); ++index) {
 
                                 /* Only turn red once we pass maxLen, but */
                                 /* we have to remember that the length    */
@@ -355,8 +355,7 @@ int main(int argc, char **argv)
                         /* The last character should be a newline. We take */
                         /* this opporunity to reset terminal text color.   */
                         if ((print || printAll) && color) term_default();
-                        if ((print || printAll) && buf[len - 1] != '\n')
-                                fprintf(stdout, "%c", '\n');
+                        fprintf(stdout, "%c", '\n');
                 }
 
                 if (fd != stdin) fclose(fd);
