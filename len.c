@@ -39,7 +39,7 @@ const char *HELP_ME =
 "-M, --min: Specify a minimum line length (default: 1)\n"
 "           --NOTE-- The newline character counts as a character\n"
 "-t, --tab-width: Specify how many characters a tab counts as (default: 8)\n"
-"-P, --print_matches: Print all lines that fall within the specified range\n"
+"-P, --print-matches: Print all lines that fall within the specified range\n"
 "-p, --print-offenders: Print all lines that do no fall within the\n"
 "                       specified range\n"
 "-n, --line-numbers: Print line numbers as well (Off by default)\n"
