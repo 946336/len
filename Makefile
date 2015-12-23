@@ -11,3 +11,6 @@ len: len.c
 
 len-debug: len.c
 	$(CC) $(CFLAGS) $(DEBUG) $^ -o $@
+
+make clean:
+	rm -f len len-debug

@@ -573,7 +573,6 @@ size_t my_getline(char **buf, size_t *size, FILE *fd)
                 if ((i + 2) >= *size){
                         *buf = realloc(*buf, 2 * (*size) + 1);
                         *size *= 2;
-                        fprintf(stderr, "Size increased to %lu\n", *size);
                         if (*buf == NULL) {
                                 return (size_t) -1;
                         }
@@ -639,5 +638,3 @@ size_t my_getline(char **buf, size_t *size, FILE *fd)
         (*buf)[i] = NULLCHAR;
         return i;
 }
-
-
