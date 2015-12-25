@@ -355,7 +355,7 @@ int main(int argc, char **argv)
                         /* The last character should be a newline. We take */
                         /* this opporunity to reset terminal text color.   */
                         if ((print || printAll) && color) term_default();
-                        fprintf(stdout, "%c", '\n');
+                        if (print || printAll) fprintf(stdout, "%c", '\n');
                 }
 
                 if (fd != stdin) fclose(fd);
