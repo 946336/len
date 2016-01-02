@@ -26,18 +26,14 @@ const char *HELP_ME =
 "len version 1.1: Line length checker\n\n"
 "Usage: len [OPTIONS] {filename,-}\n"
 "       Specify [-] as the last option to read from stdin.\n\n"
-"--NOTE-- len's behavior on non plaintext files is undefined\n"
-"--NOTE-- len does not handle lines with nothing but whitespace\n"
-"         particularly elegantly\n"
-"--NOTE-- len does not support regular expressions\n\n"
 "Options:\n"
-"--NOTE-- Short options not requiring arguments can be combined\n"
-"--NOTE-- Arguments to long options are mandatory to their short\n"
-"         counterparts as well.\n"
-"         i.e. -npr is equivalent to -n -p -r, but -nm is invalid\n"
+"       Short options not requiring arguments can be combined\n"
+"       Arguments to long options are mandatory to their short\n"
+"               counterparts as well.\n"
+"               i.e. -npr is equivalent to -n -p -r, but -nm is invalid\n"
 "-m, --max: Specify a maximum line length(default: 80)\n"
 "-M, --min: Specify a minimum line length (default: 1)\n"
-"           --NOTE-- The newline character counts as a character\n"
+"           The newline character counts as a character\n"
 "-t, --tab-width: Specify how many characters a tab counts as (default: 8)\n"
 "-P, --print-matches: Print all lines that fall within the specified range\n"
 "-p, --print-offenders: Print all lines that do no fall within the\n"
@@ -54,11 +50,10 @@ const char *HELP_ME =
 "\t255 - No arguments given\n"
 "\t254 - Missing an argument or option\n"
 "\t253 - Could not open file for reading\n"
-"\t252 - Unable to allocate enough memory. Are you running low or is the\n"
-"\t      file nothing but a single long line?\n"
+"\t252 - Unable to allocate enough memory. Are you running low or is\n"
+"\t      the file nothing but a single long line?\n"
 "\t251 - Unrecognized option\n"
 "\t250 - Bad combine. Cannot combine options that require arguments\n";
-
 
 /* Option prefix */
 const char      OPTION         = '-';
@@ -151,7 +146,6 @@ inline static void term_red();
 inline static void term_green();
 inline static void term_default();
 
-/* I won't use the GNU getline() here.                                   */
 /* my_getline() will react to the MY_GETLINE_TABWIDTH macro by expanding */
 /* tabs to that many spaces                                              */
 size_t my_getline(char **buf, size_t *size, FILE *fd);

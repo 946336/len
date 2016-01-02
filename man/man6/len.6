@@ -1,5 +1,5 @@
 .\" Manpage for len.
-.TH man 6 "4 December 2015" "1.1" "Nonstandard Utility: \fBlen\fR"
+.TH man 6 "2 January 2016" "1.1" "Nonstandard Utility: \fBlen\fR"
 .SH NAME
 .PP
 \fBlen\fR \- ensure the line lengths of a plaintext file are within a certain range. Originally intended for source code.
@@ -11,12 +11,11 @@
 \fBlen\fR [\fIOPTIONS\fR] \fIFILES\fR
 .SH DESCRIPTION
 .PP
-Scan through text files and check if the lengths of all lines (delimited by newline characters) are within a certain range.
-\fBlen\fR can process multiple files in a single invocation.
+Scan through text files and check if the lengths of all lines (delimited by newline characters) are within a certain range. \fBlen\fR can process multiple files in a single invocation.
 .PP
 Specify \fI\-\fR in place of \fIFILE\fR to read from \fBstdin\fR.
 .PP
-By default,\fBlen\fR does not produce any output.
+By default, \fBlen\fR does not produce any output.
 .PP
 \fBlen\fR can print all lines that meet the criteria, all lines that do not meet the criteria, or print all lines.
 .SH OPTIONS
@@ -47,7 +46,7 @@ Prefix lines with line numbers. Has no effect unless one or both of \-p and \-P 
 Turns on color. Has no effect unless one or both of \-p and \-P are specified.
 .TP
 \fB\-r, \-\-truncate\fR
-Truncates lines longer than MAX_LINE_LENGTH to a length of MAX_LINE_LENGTH and postfixes them with a '+' character in red.
+Truncates lines longer than \fIMAX_LINE_LENGTH\fR to a length of \fIMAX_LINE_LENGTH\fR and postfixes them with a '+'.
 .TP
 \fB\-l, \-\-line\-lengths\fR
 Displays line lengths. Has no effect unless one or both of \-p and \-P are specified.
@@ -62,8 +61,8 @@ Checks \fIFILE\fR to make sure all lines are between 1 and 80 characters long (d
 \fBlen\fR \fIFILE1\fR \fIFILE2\fR \fI...\fR
 Checks that all lines in all files named are within tolerance.
 .TP
-\fBlen\fR \fB\-m\fR \fIMAX\fR \fB\-M\fR \fIMIN\fR \fIFILE\fR
-Checks FILE to make sure all lines are between MIN and MAX characters long.
+\fBlen\fR \fB\-m\fR \fIMAX_LINE_LENGTH\fR \fB\-M\fR \fIMIN_LINE_LENGTH\fR \fIFILE\fR
+Checks FILE to make sure all lines are between \fIMIN_LINE_LENGTH\fR and \fIMAX_LINE_LENGTH\fR characters long.
 .TP
 \fBlen\fR \fB\-np\fR \fIFILE\fR
 Checks \fIFILE\fR, prints all lines that are out of tolerance, and gives line
@@ -104,11 +103,9 @@ Missing an argument to a flag
 No options or arguments given to program
 .SH KNOWN ISSUES
 .PP
-\fBlen\fR does not ignore lines comprised solely of whitespace save for lines containing a single newline
+\fBlen\fR does not ignore lines comprised solely of whitespace save for lines containing a single newline ('\\n') character.
 .PP
-\fBlen\fR will not warn you when you are attempting to analyze binary files.
-.PP
-\fBlen\fR has a tendency to butcher long runs of newlines
+\fBlen\fR will interpret Windows-style line endings in their full '\\r\\n' glory, counting as two characters.
 .SH AUTHOR
 .PP
 Written by Wesley Wei
