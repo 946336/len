@@ -29,7 +29,7 @@ const char *HELP_ME =
 "Options:\n"
 "       Short options not requiring arguments can be combined\n"
 "       Arguments to long options are mandatory to their short\n"
-"               counterparts as well.\n"
+"               counterparts as well\n"
 "               i.e. -npr is equivalent to -n -p -r, but -nm is invalid\n"
 "-m, --max: Specify a maximum line length(default: 80)\n"
 "-M, --min: Specify a minimum line length (default: 1)\n"
@@ -40,20 +40,14 @@ const char *HELP_ME =
 "                       specified range\n"
 "-n, --line-numbers: Print line numbers as well (Off by default)\n"
 "-c, --color: Enable coloring parts of lines that are outside of the\n"
-"            specified range. Has no effect unless -P or -p is specified\n"
-"-r, --truncate: Truncate long lines, indicated with \"+\"\n"
+"            specified range\n"
+"-r, --truncate: Truncate long lines\n"
 "-l, --line-length: Show line lengths\n"
 "-h, --help: Display this help and exit\n\n"
 "Return values:\n"
-"\t  0 - All lines were within the specified range\n"
-"\t  1 - At least one line was out of the specified range\n"
-"\t255 - No arguments given\n"
-"\t254 - Missing an argument or option\n"
-"\t253 - Could not open file for reading\n"
-"\t252 - Unable to allocate enough memory. Are you running low or is\n"
-"\t      the file nothing but a single long line?\n"
-"\t251 - Unrecognized option\n"
-"\t250 - Bad combine. Cannot combine options that require arguments\n";
+"    Other values indicate other errors\n"
+"      0 - All lines were within the specified range\n"
+"      1 - At least one line was out of the specified range\n";
 
 /* Option prefix */
 const char      OPTION         = '-';
@@ -90,17 +84,16 @@ const char      *TRUNCATE_LONG       = "truncate";
 const char      *LINE_LENGTHS_LONG   = "line-lengths";
 
 const char      TRUNCATE_CHAR   = '+';
-
 const char      TAB             = '\t';
 const char      NULLCHAR        = '\0';
 
 /* Return values */
-const int       NO_ARGS                 = 255;
-const int       BAD_ARGS                = 254;
-const int       BAD_FILE                = 253;
-const int       MEM_EXCEEDED            = 252;
-const int       WHAT_IS_THAT_FLAG       = 251;
-const int       BAD_COMBINE             = 250;
+const int       BAD_COMBINE             = 100;
+const int       WHAT_IS_THAT_FLAG       = 101;
+const int       MEM_EXCEEDED            = 102;
+const int       BAD_FILE                = 103;
+const int       BAD_ARGS                = 104;
+const int       NO_ARGS                 = 105;
 
 /* Default values */
 static unsigned        maxLen          = 80;
@@ -219,8 +212,7 @@ int main(int argc, char **argv)
                 else fd = fopen(argv[i], "r");
                 if (fd == NULL){
                         fprintf(stderr, "%s %s %s\n", "Could not open file",
-                                                      argv[i],
-                                                      "for reading");
+                                                      argv[i], "for reading");
                         exit(BAD_FILE);
                 }
 
@@ -269,11 +261,11 @@ int main(int argc, char **argv)
                                 if (offenders && !printAll) continue;
                         }
 
-                        /* Line numbers up to 10^7 - 1. If your files is   */
+                        /* Line numbers up to 10^7 - 1. If your files are  */
                         /* longer than that, you have bigger problems than */
                         /* the output from this program not lining up      */
-                        if (PRINTING && lineNums) fprintf(stdout, "%7lu",
-                                                  (unsigned long) line);
+                        if (PRINTING && lineNums)
+                                fprintf(stdout, "%7lu", (unsigned long) line);
 
                         /* Line lengths up to 10^3 - 1. If your  lines are */
                         /* longer than that, you have other problems.      */
@@ -318,8 +310,8 @@ int main(int argc, char **argv)
                                 /* out of tolerance - not relevant there    */
                                 if (!overMinLen &&
                                     (charCount >= (minLen - 1))) {
+                                        overMinLen = true;
                                         if (PRINTING || !offenders) {
-                                                overMinLen = true;
                                                 if (color && (minLen != 1))
                                                         if ((len <= maxLen) ||
                                                             printAll)
@@ -340,7 +332,7 @@ int main(int argc, char **argv)
                         if (minLen != 1 && len > 1 && charCount < minLen) {
                                 if (PRINTING && color) term_red();
                                 for (; charCount < (minLen - 1); ++charCount) {
-                                        if (color){
+                                        if (color) {
                                                 fprintf(stdout, "%c",
                                                         REAR_PADDING);
                                         }

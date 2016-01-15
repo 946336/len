@@ -1,5 +1,5 @@
 .\" Manpage for len.
-.TH man 6 "2 January 2016" "1.1" "Nonstandard Utility: \fBlen\fR"
+.TH man 6 "15 January 2016" "1.1" "Nonstandard Utility: \fBlen\fR"
 .SH NAME
 .PP
 \fBlen\fR \- ensure the line lengths of a plaintext file are within a certain range. Originally intended for source code.
@@ -84,28 +84,23 @@ All lines in all files were in tolerance
 .B 1
 At least one line among all lines read was out of tolerance
 .TP
-.B 250
+.B 100
 Cannot combine options that require arguments
 .TP
-.B 251
+.B 101
 Unrecognized option
 .TP
-.B 252
+.B 102
 Unable to allocate sufficient memory
 .TP
-.B 253
+.B 103
 Could not open specified file
 .TP
-.B 254
+.B 104
 Missing an argument to a flag
 .TP
-.B 255
+.B 105
 No options or arguments given to program
-.SH KNOWN ISSUES
-.PP
-\fBlen\fR does not ignore lines comprised solely of whitespace save for lines containing a single newline ('\\n') character.
-.PP
-\fBlen\fR will interpret Windows-style line endings in their full '\\r\\n' glory, counting as two characters.
 .SH AUTHOR
 .PP
 Written by Wesley Wei
