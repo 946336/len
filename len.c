@@ -119,6 +119,10 @@ static bool            lineLengths     = false;
 
 /****************************************************************************/
 
+#define PRINTING (print || printAll)
+
+/****************************************************************************/
+
 /* Don't forget that the last arg is a filename                          */
 /* Used to make sure that the arguments given to flags that require them */
 /* are "valid"                                                           */
@@ -133,7 +137,7 @@ static bool            lineLengths     = false;
                                 exit(BAD_ARGS);                              \
                      }
 
-/* Shothand for matching long ans short flags */
+/* Shorthand for matching long ans short flags */
 #define MATCH_S(I, J, SHORT_FLAG) argv[I][J] == SHORT_FLAG
 #define MATCH_L(I, LONG_FLAG) !strcmp(&(argv[I][2]), LONG_FLAG)
 
@@ -220,12 +224,12 @@ int main(int argc, char **argv)
                         exit(BAD_FILE);
                 }
 
-                if ((print || printAll) && color) term_default();
+                if (PRINTING && color) term_default();
 
                 /* In the case where more than one file is examined, we  */
                 /* label the relevant contents of each file as such      */
                 if (numFiles > 1) {
-                        if ((print || printAll)) {
+                        if (PRINTING) {
                                 if (fd != stdin){
                                         fprintf(stdout, "\n--|%d: %s|--\n",
                                                 numFiles - (argc - i) + 1,
@@ -268,14 +272,12 @@ int main(int argc, char **argv)
                         /* Line numbers up to 10^7 - 1. If your files is   */
                         /* longer than that, you have bigger problems than */
                         /* the output from this program not lining up      */
-                        if ((print || printAll) && lineNums) fprintf(stdout,
-                                                             "%7lu",
-                                                             (unsigned long)
-                                                             line);
+                        if (PRINTING && lineNums) fprintf(stdout, "%7lu",
+                                                  (unsigned long) line);
 
                         /* Line lengths up to 10^3 - 1. If your  lines are */
                         /* longer than that, you have other problems.      */
-                        if ((print || printAll) && lineLengths) {
+                        if (PRINTING && lineLengths) {
                                 if ((color) && (len != 1)){
                                         if (len < minLen || len > maxLen)
                                                 term_red();
@@ -285,7 +287,7 @@ int main(int argc, char **argv)
                                 if (color) term_default();
                         }
 
-                        if ((print || printAll) && (lineNums || lineLengths)) {
+                        if (PRINTING && (lineNums || lineLengths)) {
                             fprintf(stdout, ": ");
                         }
 
@@ -302,7 +304,7 @@ int main(int argc, char **argv)
                                 /* counts the newline as a single char    */
                                 if (!overMaxLen && charCount >= (maxLen - 1)) {
                                         overMaxLen = true;
-                                        if ((print || printAll) && color)
+                                        if (PRINTING && color)
                                                 term_red();
                                         if (truncate) {
                                                 fprintf(stdout, "%c",
@@ -316,17 +318,16 @@ int main(int argc, char **argv)
                                 /* out of tolerance - not relevant there    */
                                 if (!overMinLen &&
                                     (charCount >= (minLen - 1))) {
-                                        if (print || printAll || !offenders) {
+                                        if (PRINTING || !offenders) {
                                                 overMinLen = true;
-                                                if ((print || printAll)
-                                                    && color && (minLen != 1))
+                                                if (color && (minLen != 1))
                                                         if ((len <= maxLen) ||
                                                             printAll)
                                                                 term_green();
                                         }
                                 }
 
-                                if ((print || printAll)) {
+                                if (PRINTING) {
                                         fprintf(stdout, "%c", buf[index]);
                                         ++charCount;
                                 }
@@ -337,9 +338,9 @@ int main(int argc, char **argv)
                         /* Don't punish empty lines, but don't forget to  */
                         /* account for the newline in nonempty lines      */
                         if (minLen != 1 && len > 1 && charCount < minLen) {
-                                if ((print || printAll) && color) term_red();
+                                if (PRINTING && color) term_red();
                                 for (; charCount < (minLen - 1); ++charCount) {
-                                        if ((print || printAll) && color){
+                                        if (color){
                                                 fprintf(stdout, "%c",
                                                         REAR_PADDING);
                                         }
@@ -348,15 +349,15 @@ int main(int argc, char **argv)
 
                         /* The last character should be a newline. We take */
                         /* this opporunity to reset terminal text color.   */
-                        if ((print || printAll) && color) term_default();
-                        if (print || printAll) fprintf(stdout, "%c", '\n');
+                        if (PRINTING && color) term_default();
+                        if (PRINTING) fprintf(stdout, "%c", '\n');
                 }
 
                 if (fd != stdin) fclose(fd);
         }
 
         /* Extra newline at end of output for visual clarity */
-        if (print || printAll) fprintf(stdout, "\n");
+        if (PRINTING) fprintf(stdout, "\n");
 
         free(buf);
         return violated ? EXIT_FAILURE : EXIT_SUCCESS;
