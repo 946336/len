@@ -1,7 +1,7 @@
 # len
 Line length utility
 
-<samp>len</samp> is a small utility that counts line lengths from text files. Its behavior on other file types is undefined and probably not very nice.
+`len` is a small utility that counts line lengths from text files. Its behavior on other file types is undefined and probably not very nice.
 
 By default, `len` does not produce any output on stdout or stderr unless examining multiple files.
 
