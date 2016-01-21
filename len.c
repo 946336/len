@@ -572,6 +572,7 @@ size_t my_getline(char **buf, size_t *size, FILE *fd)
                                 *size = -1;
                                 return (size_t) -1;
                         }
+                        else ++i;
                 }
                 else {
                         (*buf)[i] = c;
