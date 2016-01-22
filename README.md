@@ -36,7 +36,7 @@ Prefix lines with line numbers.
 Turns on color.
 
 **-r, --truncate**<br>
-Truncate longlines longer than *`MAX_LINE_LENGTH`* to a length of *`MAX_LINE_LENGTH`* and postfixes them with `*`.
+Truncate longlines longer than *`MAX_LINE_LENGTH`* to a length of *`MAX_LINE_LENGTH`* and postfixes them with `+`.
 
 **-l, --line-lengths**<br>
 Prefix lines with their length.
