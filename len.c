@@ -31,7 +31,7 @@ const char *HELP_ME =
 "       Arguments to long options are mandatory to their short\n"
 "               counterparts as well\n"
 "               i.e. -npr is equivalent to -n -p -r, but -nm is invalid\n"
-"-m, --max: Specify a maximum line length(default: 80)\n"
+"-m, --max: Specify a maximum line length (default: 80)\n"
 "-M, --min: Specify a minimum line length (default: 1)\n"
 "           The newline character counts as a character\n"
 "-t, --tab-width: Specify how many characters a tab counts as (default: 8)\n"
@@ -156,7 +156,7 @@ int main(int argc, char **argv)
                 exit(NO_ARGS);
         }
         
-        /* i will give the index of the first filename */
+        /* i gives the index of the first filename */
         int i = parseArgs(argc, argv);
 
         /* Sanity check: minLen must not be greater than maxLen          */
@@ -181,7 +181,7 @@ int main(int argc, char **argv)
         if (flags) print_flags(i, argc);
 
         /* If no file specified but '-' specified as last option, read from */
-        /* stdin instead and reduce i so that we pretend stdin is a file.   */
+        /* stdin instead and reduce i so to pretend stdin is a file.        */
         if ((argv[argc - 1][0] == READ_STDIN &&
             argv[argc - 1][1] == NULLCHAR)) {
                 if (numFiles == 0) {
@@ -197,7 +197,7 @@ int main(int argc, char **argv)
         }
 
         /* violated is tracked cumulatively. A violation in any file will */
-        /* cause the enntire batch to be reported as bad                  */
+        /* cause the entire batch to be reported as bad                  */
         bool violated = false;
 
         /* Process each remaining argument as a filename */
@@ -219,7 +219,7 @@ int main(int argc, char **argv)
                 if (PRINTING && color) term_default();
 
                 /* In the case where more than one file is examined, we  */
-                /* label the relevant contents of each file as such      */
+                /* label the relevant contents of each file              */
                 if (numFiles > 1) {
                         if (PRINTING) {
                                 if (fd != stdin){
