@@ -578,7 +578,7 @@ size_t my_getline(char **buf, size_t *size, FILE *fd)
                         (*buf)[i] = c;
                         /* UNIX line endings:       \n   */
                         /* OSX line endings:        \r   */
-                        /* Windows line eendings    \r\n */
+                        /* Windows line endings    \r\n */
                         #if defined(MY_GETLINE_TABWIDTH)
                                 if ((*buf)[i] == TAB) {
                                         if (*size <=
