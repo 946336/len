@@ -46,20 +46,20 @@ Prefix lines with line numbers. Has no effect unless one or both of \-p and \-P 
 Turns on color. Has no effect unless one or both of \-p and \-P are specified.
 .TP
 \fB\-r, \-\-truncate\fR
-Truncates lines longer than \fIMAX_LINE_LENGTH\fR to a length of \fIMAX_LINE_LENGTH\fR and postfixes them with a '+'.
+Truncates lines longer than \fIMAX_LINE_LENGTH\fR to a length of \fIMAX_LINE_LENGTH\fR and postfixes them with '+'.
 .TP
 \fB\-l, \-\-line\-lengths\fR
 Displays line lengths. Has no effect unless one or both of \-p and \-P are specified.
 .TP
 \fB\-N, \-\-count\-newlines\fR
-Counts newlines when calculating line lengths. Note that all newline sequences are transformed into a single newline character '\\n.' When specified with \-c, colors change one character earlier, so that the correct number of characters are colored. For example, if the newline is the 81st character in the line and \fIMAX_LINE_LENGTH\fR is 80, the 80 character will be colored. Off by default.
+Counts newlines when calculating line lengths. Note that all newline sequences are transformed into a single newline character '\\n'. When specified with \-c, colors change one character earlier, so that the correct number of characters are colored. For example, if the newline is the 81st character in the line and \fIMAX_LINE_LENGTH\fR is 80, the 80 character will be colored. Off by default.
 .TP
 \fB\-h, \-\-help\fR
 Display help and exit.
 .SH EXAMPLES
 .TP
 \fBlen\fR \fIFILE\fR
-Checks \fIFILE\fR to make sure all lines are between 1 and 80 characters long (default behavior).
+Checks \fIFILE\fR to make sure all lines are at most 80 characters long (default behavior).
 .TP
 \fBlen\fR \fIFILE1\fR \fIFILE2\fR \fI...\fR
 Checks that all lines in all files named are within tolerance.

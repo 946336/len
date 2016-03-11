@@ -16,7 +16,7 @@ Set the upper limit of line lengths. This cannot be negative or less than the lo
 Default: 80
 
 **-M, --min** *`MIN_LINE_LENGTH`* <br>
-Set the lower limit for line lengths. This cannot exceed the upper limit. Newlines are counted as one character.<br>
+Set the lower limit for line lengths. This cannot exceed the upper limit.<br>
 Default: 1
 
 **-t, --tab-width** *`TAB_WIDTH`*<br>
