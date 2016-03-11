@@ -43,6 +43,8 @@ const char *HELP_ME =
 "            specified range\n"
 "-r, --truncate: Truncate long lines\n"
 "-l, --line-length: Show line lengths\n"
+"-N, --count-newlines: Include newline characters when calculating line"
+"                      length. Off by default"
 "-h, --help: Display this help and exit\n\n"
 "Return values:\n"
 "    Other values indicate other errors\n"
@@ -56,32 +58,34 @@ const char      OPTION         = '-';
 const char      REAR_PADDING   = '-';
 
 /* Short options */
-const char      MAX            = 'm';
-const char      MIN            = 'M';
-const char      TABWIDTH       = 't';
-const char      MATCHES        = 'P'; /* Uppercase */
-const char      OFFENDERS      = 'p'; /* Lowercase */
-const char      LINE_NUMS      = 'n';
-const char      COLOR          = 'c';
-const char      TRUNCATE       = 'r';
-const char      LINE_LENGTHS   = 'l';
-const char      HELP           = 'h';
+const char      MAX             = 'm';
+const char      MIN             = 'M';
+const char      TABWIDTH        = 't';
+const char      MATCHES         = 'P'; /* Uppercase */
+const char      OFFENDERS       = 'p'; /* Lowercase */
+const char      LINE_NUMS       = 'n';
+const char      COLOR           = 'c';
+const char      TRUNCATE        = 'r';
+const char      LINE_LENGTHS    = 'l';
+const char      NEWLINES        = 'N';
+const char      HELP            = 'h';
 
 /* Specify this last to read from stdin */
 const char      READ_STDIN     = '-';
 
 /* Long arguments */
-const char      *MAX_LONG            = "max";
-const char      *MIN_LONG            = "min";
-const char      *TABWIDTH_LONG       = "tab-width";
-const char      *MATCHES_LONG        = "print-matches";
-const char      *OFFENDERS_LONG      = "print-offenders";
-const char      *LINE_NUMS_LONG      = "line-numbers";
-const char      *COLOR_LONG          = "color";
-const char      *HELP_LONG           = "help";
-const char      *FLAGS_LONG          = "flags";
-const char      *TRUNCATE_LONG       = "truncate";
-const char      *LINE_LENGTHS_LONG   = "line-lengths";
+const char      *MAX_LONG           = "max";
+const char      *MIN_LONG           = "min";
+const char      *TABWIDTH_LONG      = "tab-width";
+const char      *MATCHES_LONG       = "print-matches";
+const char      *OFFENDERS_LONG     = "print-offenders";
+const char      *LINE_NUMS_LONG     = "line-numbers";
+const char      *COLOR_LONG         = "color";
+const char      *HELP_LONG          = "help";
+const char      *FLAGS_LONG         = "flags";
+const char      *TRUNCATE_LONG      = "truncate";
+const char      *NEWLINES_LONG      = "count-newlines";
+const char      *LINE_LENGTHS_LONG  = "line-lengths";
 
 const char      TRUNCATE_CHAR   = '+';
 const char      TAB             = '\t';
@@ -96,19 +100,20 @@ const int       BAD_ARGS                = 104;
 const int       NO_ARGS                 = 105;
 
 /* Default values */
-static unsigned        maxLen          = 80;
-static unsigned        minLen          = 1; /* Empty lines are 1 char long */
-static unsigned        tabWidth        = 8;
+static unsigned         maxLen          = 80;
+static unsigned         minLen          = 1; /* Empty lines are 1 char long */
+static unsigned         tabWidth        = 8;
 
 /* Behavior flags controlled by args to program */
-static bool            print           = false;
-static bool            printAll        = false;
-static bool            offenders       = true;   /* No effect without print */
-static bool            lineNums        = false;
-static bool            color           = false;
-static bool            flags           = false;
-static bool            truncate        = false;
-static bool            lineLengths     = false;
+static bool             print           = false;
+static bool             printAll        = false;
+static bool             offenders       = true;   /* No effect without print */
+static bool             lineNums        = false;
+static bool             color           = false;
+static bool             flags           = false;
+static bool             truncate        = false;
+static bool             newlines        = false; 
+static bool             lineLengths     = false;
 
 /****************************************************************************/
 
@@ -130,7 +135,7 @@ static bool            lineLengths     = false;
                                 exit(BAD_ARGS);                              \
                      }
 
-/* Shorthand for matching long ans short flags */
+/* Shorthand for matching long and short flags */
 #define MATCH_S(I, J, SHORT_FLAG) argv[I][J] == SHORT_FLAG
 #define MATCH_L(I, LONG_FLAG) !strcmp(&(argv[I][2]), LONG_FLAG)
 
@@ -240,6 +245,11 @@ int main(int argc, char **argv)
                 size_t index = 0;
                 size_t charCount = 0;
 
+                /* Since getline counts newlines, we need to allow for them */
+                if (!newlines) {
+                    ++maxLen;
+                }
+
                 /* Assignment evaluates to the value assigned */
                 while((len = my_getline(&buf, &size, fd)) !=
                                         (size_t) -1) {
@@ -275,7 +285,9 @@ int main(int argc, char **argv)
                                                 term_red();
                                         else term_green();
                                 }
-                                fprintf(stdout, " [%3u]", (unsigned) len);
+                                /* We may or may not want to count newlines */
+                                fprintf(stdout, " [%3lu]", newlines ?
+                                                           len : (len - 1));
                                 if (color) term_default();
                         }
 
@@ -401,6 +413,8 @@ int parseArgs(int argc, char **argv)
                                         flags = true;
                                 } else if (MATCH_L(i, LINE_LENGTHS_LONG)) {
                                         lineLengths = true;
+                                } else if (MATCH_L(i, NEWLINES_LONG)) {
+                                        newlines = true;
                                 } else if (MATCH_L(i, HELP_LONG)) {
                                         fprintf(stdout, "%s\n", HELP_ME);
                                         exit(EXIT_SUCCESS);
@@ -474,6 +488,8 @@ int parseArgs(int argc, char **argv)
                                 color = true;
                         } else if (MATCH_S(i, j, LINE_LENGTHS)) {
                                 lineLengths = true;
+                        } else if (MATCH_S(i, j, NEWLINES)) {
+                                newlines = true;
                         } else if (MATCH_S(i, j, HELP)) {
                                 fprintf(stdout, "%s\n", HELP_ME);
                                 exit(EXIT_SUCCESS);
@@ -506,6 +522,8 @@ inline static void print_flags(int i, int argc)
         fprintf(stderr, "%s: %s\n", "color", color ? "true" : "false");
         fprintf(stderr, "%s: %s\n", "lineLengths",
                                     lineLengths ? "true" : "false");
+        fprintf(stderr, "%s: %s\n", "count newlines?",
+                                    newlines ? "true" : "false");
 }
 
 static const char *ESC = "\033[";
@@ -578,7 +596,7 @@ size_t my_getline(char **buf, size_t *size, FILE *fd)
                         (*buf)[i] = c;
                         /* UNIX line endings:       \n   */
                         /* OSX line endings:        \r   */
-                        /* Windows line eendings    \r\n */
+                        /* Windows line endings     \r\n */
                         #if defined(MY_GETLINE_TABWIDTH)
                                 if ((*buf)[i] == TAB) {
                                         if (*size <=
