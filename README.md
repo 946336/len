@@ -42,7 +42,7 @@ Truncate longlines longer than *`MAX_LINE_LENGTH`* to a length of *`MAX_LINE_LEN
 Prefix lines with their length.
 
 **-N, --count-newlines**<br>
-Include newlines when calculating line length. Note that all newline sequences (\n, \r, \r\n) are converted to a single newline character \n. When specified with *`-c`* or *`--color`*, colors change one character earlier, so that the correct number of characters are colored. For example, if the newline is the 81st character in the line and *`MAX_LINE_LENGTH`* is 80, the 80th character will be colored. Off by default.
+Include newlines when calculating line length. Note that all newline sequences (\n, \r, \r\n) are converted to a single newline character \n. When specified with `-c` or `--color`, colors change one character earlier, so that the correct number of characters are colored. For example, if the newline is the 81st character in the line and *`MAX_LINE_LENGTH`* is 80, the 80th character will be colored. Off by default.
 
 **-h, --help**<br>
 Display help and exit
