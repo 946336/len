@@ -33,18 +33,18 @@ const char *HELP_ME =
 "               i.e. -npr is equivalent to -n -p -r, but -nm is invalid\n"
 "-m, --max: Specify a maximum line length (default: 80)\n"
 "-M, --min: Specify a minimum line length (default: 1)\n"
-"           The newline character counts as a character\n"
 "-t, --tab-width: Specify how many characters a tab counts as (default: 8)\n"
 "-P, --print-matches: Print all lines that fall within the specified range\n"
 "-p, --print-offenders: Print all lines that do no fall within the\n"
 "                       specified range\n"
 "-n, --line-numbers: Print line numbers as well (Off by default)\n"
 "-c, --color: Enable coloring parts of lines that are outside of the\n"
-"            specified range\n"
+"             specified range\n"
 "-r, --truncate: Truncate long lines\n"
 "-l, --line-length: Show line lengths\n"
-"-N, --count-newlines: Include newline characters when calculating line"
-"                      length. Off by default"
+"-N, --count-newlines: Include newline characters when calculating line\n"
+"                      length. Off by default\n"
+"-i, --invert-colors: Makes -c color backgrounds instead of text\n"
 "-h, --help: Display this help and exit\n\n"
 "Return values:\n"
 "    Other values indicate other errors\n"
@@ -68,6 +68,7 @@ const char      COLOR           = 'c';
 const char      TRUNCATE        = 'r';
 const char      LINE_LENGTHS    = 'l';
 const char      NEWLINES        = 'N';
+const char      INVERT          = 'i';
 const char      HELP            = 'h';
 
 /* Specify this last to read from stdin */
@@ -86,6 +87,7 @@ const char      *FLAGS_LONG         = "flags";
 const char      *TRUNCATE_LONG      = "truncate";
 const char      *NEWLINES_LONG      = "count-newlines";
 const char      *LINE_LENGTHS_LONG  = "line-lengths";
+const char      *INVERT_LONG        = "invert-colors";
 
 const char      TRUNCATE_CHAR   = '+';
 const char      TAB             = '\t';
@@ -114,6 +116,7 @@ static bool             flags           = false;
 static bool             truncate        = false;
 static bool             newlines        = false; 
 static bool             lineLengths     = false;
+static bool             inverted        = false;
 
 /****************************************************************************/
 
@@ -280,13 +283,14 @@ int main(int argc, char **argv)
                         /* Line lengths up to 10^3 - 1. If your  lines are */
                         /* longer than that, you have other problems.      */
                         if (PRINTING && lineLengths) {
+                                fputc(' ', stdout);
                                 if ((color) && (len != 1)){
                                         if (len < minLen || len > maxLen)
                                                 term_red();
                                         else term_green();
                                 }
                                 /* We may or may not want to count newlines */
-                                fprintf(stdout, " [%3lu]", newlines ?
+                                fprintf(stdout, "[%3lu]", newlines ?
                                                            len : (len - 1));
                                 if (color) term_default();
                         }
@@ -415,6 +419,8 @@ int parseArgs(int argc, char **argv)
                                         lineLengths = true;
                                 } else if (MATCH_L(i, NEWLINES_LONG)) {
                                         newlines = true;
+                                } else if (MATCH_L(i, INVERT_LONG)) {
+                                        inverted = true;
                                 } else if (MATCH_L(i, HELP_LONG)) {
                                         fprintf(stdout, "%s\n", HELP_ME);
                                         exit(EXIT_SUCCESS);
@@ -490,6 +496,8 @@ int parseArgs(int argc, char **argv)
                                 lineLengths = true;
                         } else if (MATCH_S(i, j, NEWLINES)) {
                                 newlines = true;
+                        } else if (MATCH_S(i, j, INVERT)) {
+                                inverted = true;
                         } else if (MATCH_S(i, j, HELP)) {
                                 fprintf(stdout, "%s\n", HELP_ME);
                                 exit(EXIT_SUCCESS);
@@ -527,15 +535,16 @@ inline static void print_flags(int i, int argc)
 }
 
 static const char *ESC = "\033[";
+static const char *INV = "\033[1;7;";
 
 inline static void term_red()
 {
-        printf("%s31m", ESC);
+        printf("%s31m", inverted ? INV : ESC);
 }
 
 inline static void term_green()
 {
-        printf("%s32m", ESC);
+        printf("%s32m", inverted ? INV : ESC);
 }
 
 inline static void term_default()
