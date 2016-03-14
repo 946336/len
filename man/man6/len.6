@@ -1,5 +1,5 @@
 .\" Manpage for len.
-.TH man 6 "11 March 2016" "1.2" "Nonstandard Utility: \fBlen\fR"
+.TH man 6 "14 March 2016" "1.2" "Nonstandard Utility: \fBlen\fR"
 .SH NAME
 .PP
 \fBlen\fR \- ensure the line lengths of a plaintext file are within a certain range. Originally intended for source code.
@@ -52,6 +52,9 @@ Displays line lengths. Has no effect unless one or both of \-p and \-P are speci
 .TP
 \fB\-N, \-\-count\-newlines\fR
 Counts newlines when calculating line lengths. Note that all newline sequences are transformed into a single newline character '\\n'. When specified with \-c, colors change one character earlier, so that the correct number of characters are colored. For example, if the newline is the 81st character in the line and \fIMAX_LINE_LENGTH\fR is 80, the 80 character will be colored. Off by default.
+.TP
+\fB\-i, \-\-invert\-colors\fR
+Causes output that would be colored to instead have its background colored. Has no effect unless \-c is specified
 .TP
 \fB\-h, \-\-help\fR
 Display help and exit.
