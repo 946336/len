@@ -7,7 +7,7 @@ By default, `len` does not produce any output on stdout or stderr unless examini
 
 When piping output from `len` to `less`, be sure to specify `-r` with `less` if you want colors to be displayed properly.
 
-Feel free to glance at the spaghetti code that is the source code - I've tried to leave helpful comments, but those can only go so far.
+Feel free to glance at the floppy noodle that is the source code - I've tried to leave helpful comments, but those can only go so far.
 
 <hr>
 <h4>Options</h4>
@@ -70,6 +70,17 @@ Equivalent to `--set-good GOOD --set-bad BAD`.
 
 **-h, --help**<br>
 Display help and exit
+
+<hr>
+<h4>Colors</h4>
+`len` handles the following (case sensitive) colors:
+* red
+* green
+* yellow
+* blue
+* magenta
+* cyan
+* white
 
 <hr>
 <h4>Tab Handling</h4>
