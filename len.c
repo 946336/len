@@ -23,9 +23,9 @@ const char      *NO_COMBINE             = "Cannot combine option:";
 
 /* Help text */
 const char *HELP_ME = 
-"len version 1.3: Line length checker\n\n"
+"len version 1.3: Line length checker\n"
 "Usage: len [OPTIONS] {filename,-}\n"
-"       Specify [-] as the last option to read from stdin.\n\n"
+"       Specify [-] as the last option to read from stdin.\n"
 "Options:\n"
 "       Short options not requiring arguments can be combined\n"
 "       Arguments to long options are mandatory to their short\n"
@@ -35,19 +35,19 @@ const char *HELP_ME =
 "-M, --min: Specify a minimum line length (default: 1)\n"
 "-t, --tab-width: Specify how many characters a tab counts as (default: 8)\n"
 "-P, --print-matches: Print all lines that fall within the specified range\n"
-"-p, --print-offenders: Print all lines that do no fall within the\n"
+"-p, --print-offenders: Print all lines that do not fall within the\n"
 "                       specified range\n"
-"-n, --line-numbers: Print line numbers as well (Off by default)\n"
-"-c, --color: Enable coloring parts of lines that are outside of the\n"
-"             specified range\n"
+"-n, --line-numbers: Show line numbers\n"
+"-c, --color: Enable coloring parts of lines based on other options\n"
 "-r, --truncate: Truncate long lines\n"
 "-l, --line-length: Show line lengths\n"
-"-N, --count-newlines: Include newline characters when calculating line\n"
-"                      length. Off by default\n"
+"-N, --count-newlines: Include newline characters when calculating line "
+"length.\n"
 "-i, --invert-colors: Makes -c color backgrounds instead of text\n"
-"-a, --alternate-colors: Alternates colors on successive files\n"
+"-a, --alternate-colors: Alternates colors on filenames. See below.\n"
 "--file-color: Sets the primary filename color\n"
-"--file-color-alt: Sets the secondary filename color\n"
+"--file-color-alt: Sets the secondary filename color. Only used if -a is"
+"                  specified\n"
 "--file-colors: Requires 2 colors as arguments. Equivalent to specifying both\n"
 "               --file-color and --file-color-alt in that order\n"
 "--set-bad: Set the color for out-of-range portions of lines\n"
@@ -55,9 +55,9 @@ const char *HELP_ME =
 "--set-colors: Requires two arguments. Equivalent to specifying both\n"
 "              --set-good and --set-bad in that order\n"
 "-h, --help: Display this help and exit\n\n"
-"Colors: red, green, yellow, blue, magenta, cyan, white\n\n"
+"Colors: red, green, yellow, blue, magenta, cyan, white\n"
 "Return values:\n"
-"    Other values indicate other errors\n"
+"    Other values indicate other errors (see man page for more details)\n"
 "      0 - All lines were within the specified range\n"
 "      1 - At least one line was out of the specified range\n";
 
@@ -85,7 +85,7 @@ const char      ALT             = 'a';
 /* Specify this last to read from stdin */
 const char      READ_STDIN     = '-';
 
-/* Long arguments */
+/* Long options */
 const char      *MAX_LONG           = "max";
 const char      *MIN_LONG           = "min";
 const char      *TABWIDTH_LONG      = "tab-width";
@@ -106,6 +106,16 @@ const char      *FILE_LONG          = "file-colors";
 const char      *SET_BAD_LONG       = "set-bad";
 const char      *SET_GOOD_LONG      = "set-good";
 const char      *SET_COLORS_LONG    = "set-colors";
+
+/* Color strings */
+#define red_str     "red"
+#define green_str   "green"
+#define yellow_str  "yellow"
+#define blue_str    "blue"
+#define magenta_str "magenta"
+#define cyan_str    "cyan"
+#define white_str   "white"
+#define def_str     "default"
 
 const char      TRUNCATE_CHAR   = '+';
 const char      TAB             = '\t';
@@ -136,8 +146,10 @@ static bool             newlines        = false;
 static bool             lineLengths     = false;
 static bool             inverted        = false;
 static bool             alternate       = false;
+/* Flags for colors */
+typedef const char *COLOR_T;
 
-/* Colors */
+/* NSI color sequences: bold to make them easier to see */
 #define red     "1;31"
 #define green   "1;32"
 #define yellow  "1;33"
@@ -146,24 +158,12 @@ static bool             alternate       = false;
 #define cyan    "1;36"
 #define white   "1;37"
 #define def     "1;0" 
-/* More colors */
-#define red_str     "red"
-#define green_str   "green"
-#define yellow_str  "yellow"
-#define blue_str    "blue"
-#define magenta_str "magenta"
-#define cyan_str    "cyan"
-#define white_str   "white"
-#define def_str     "default"
-
-/* Flags for colors */
-typedef const char *COLOR_T;
 
 COLOR_T good_color = green;
-COLOR_T  bad_color = red;
-
+COLOR_T bad_color  = red;
 COLOR_T file_color = magenta;
 COLOR_T file_alt   = cyan;
+
 
 /****************************************************************************/
 
@@ -171,9 +171,13 @@ COLOR_T file_alt   = cyan;
 
 /****************************************************************************/
 
+/* WARNING: The following macros depend on non-global variables! Check their */
+/*          scope before using them!                                         */
+
 /* Don't forget that the last arg is a filename                          */
 /* Used to make sure that the arguments given to flags that require them */
-/* are "valid"                                                           */
+/* are "valid".                                                          */
+/* Scope: arg_check */
 #define ARG_CHECK(I) if ((argc - 1) < ++I) {                                 \
                                 fprintf(stderr, "%s %s %s\n", BAD_ARG,       \
                                 argv[I - 1], "requires a numeric argument"); \
@@ -185,6 +189,7 @@ COLOR_T file_alt   = cyan;
                                 exit(BAD_ARGS);                              \
                      }
 
+/* Scope: File-level loop */
 #define PRINT_FILENAME_HEADER                                                \
                 if (numFiles > 1) {                                          \
                         if (PRINTING) {                                      \
@@ -210,14 +215,14 @@ COLOR_T file_alt   = cyan;
 #define MATCH_L(I, LONG_FLAG) !strcmp(&(argv[I][2]), LONG_FLAG)
 
 /* Print flags for debugging purposes */
-/* Printout enabled by the "flags" option */
+/* Printout enabled by the undocumented "--flags" option */
+/* Does not interrupt normal execution */
 inline static void print_flags(int i, int argc);
 
 /* Functions relating to colors */
 inline static void term_default();
 inline static void term_color(bool isGood);
 inline static void term_file();
-
 static COLOR_T strtocolor(char *str);
 
 /* my_getline() will react to the MY_GETLINE_TABWIDTH macro by expanding */
@@ -254,7 +259,6 @@ int main(int argc, char **argv)
         if (!newlines) {
             ++maxLen;
         }
-
 
         /* These must persist and are set for each file examined */
         FILE *fd = NULL;
@@ -427,9 +431,6 @@ int main(int argc, char **argv)
                 if (fd != stdin) fclose(fd);
         }
 
-        /* Extra newline at end of output for visual clarity */
-        // if (PRINTING) fprintf(stdout, "\n");
-
         free(buf);
         return violated ? EXIT_FAILURE : EXIT_SUCCESS;
 }
@@ -502,7 +503,7 @@ int parseArgs(int argc, char **argv)
                                         file_alt = strtocolor(argv[++i]);
                                         alternate = true;
                                 } else if (MATCH_L(i, HELP_LONG)) {
-                                        fprintf(stdout, "%s\n", HELP_ME);
+                                        fprintf(stdout, "%s", HELP_ME);
                                         exit(EXIT_SUCCESS);
                                 /* Unrecognized option */
                                 } else {
@@ -581,7 +582,7 @@ int parseArgs(int argc, char **argv)
                         } else if (MATCH_S(i, j, ALT)) {
                                 alternate = true;
                         } else if (MATCH_S(i, j, HELP)) {
-                                fprintf(stdout, "%s\n", HELP_ME);
+                                fprintf(stdout, "%s", HELP_ME);
                                 exit(EXIT_SUCCESS);
                         /* Unrecognized option */
                         } else {
