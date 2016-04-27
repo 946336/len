@@ -7,19 +7,19 @@ By default, `len` does not produce any output on stdout or stderr unless examini
 
 When piping output from `len` to `less`, be sure to specify `-r` with `less` if you want colors to be displayed properly.
 
-Feel free to glance at the noodle of code that is the source - I've tried to leave helpful comments, but those can only go so far.
+Feel free to glance at the floppy noodle that is the source code - I've tried to leave helpful comments, but those can only go so far.
 
 <hr>
 <h4>Options</h4>
-**-m, --max** *`MAX_LINE_LENGTH`*<br>
+**-m, --max** `MAX_LINE_LENGTH`<br>
 Set the upper limit of line lengths. This cannot be negative or less than the lower limit, described below.<br>
 Default: 80
 
-**-M, --min** *`MIN_LINE_LENGTH`* <br>
+**-M, --min** `MIN_LINE_LENGTH` <br>
 Set the lower limit for line lengths. This cannot exceed the upper limit.<br>
 Default: 1
 
-**-t, --tab-width** *`TAB_WIDTH`*<br>
+**-t, --tab-width** `TAB_WIDTH`<br>
 Set the number of spaces a tab character is interpreted as, respecting tab stops.<br>
 Default: 8
 
@@ -36,7 +36,7 @@ Prefix lines with line numbers.
 Turns on color.
 
 **-r, --truncate**<br>
-Truncate longlines longer than *`MAX_LINE_LENGTH`* to a length of *`MAX_LINE_LENGTH`* and postfixes them with `+`.
+Truncate longlines longer than `MAX_LINE_LENGTH` to a length of `MAX_LINE_LENGTH` and postfixes them with `+`.
 
 **-l, --line-lengths**<br>
 Prefix lines with their length.
@@ -47,8 +47,40 @@ Include newlines when calculating line length. Note that all newline sequences (
 **-i, --invert-colors**<br>
 Causes `-c` to color backgrounds instead of the text.
 
+**-a, --alternate-colors**<br>
+Requires `-c` or `--color`. Causes filenames to be displayed in two alternating colors. These colors can be changed via `--file-color`, `--file-color-alt`, and `--file-colors`, explained below.
+
+**--file-color** `COLOR`<br>
+Set the primary filename color to `COLOR`. Default is cyan. Used only when printing filename headers.
+
+**--file-color-alt** `COLOR`<br>
+Set the secondary filename color to `COLOR`. Default is magenta. Used only when printing filename headers with alternating colors (`-a` or `--alternate-colors`).
+
+**--file_colors** `PRIMARY` `SECONDARY`<br>
+Implies `-a`. Equivalent to `-a --file-color PRIMARY --file-color-alt SECONDARY`.
+
+**--set-bad** `COLOR`<br>
+Sets the color for out-of-tolerance portions of lines to `COLOR`. Default is red.
+
+**--set-good** `COLOR`<br>
+Sets the color for in-tolerance portions of lines to `COLOR`. Default is green.
+
+**--set-colors** `GOOD` `BAD`<br>
+Equivalent to `--set-good GOOD --set-bad BAD`.
+
 **-h, --help**<br>
 Display help and exit
+
+<hr>
+<h4>Colors</h4>
+`len` handles the following (case sensitive) colors:
+* red
+* green
+* yellow
+* blue
+* magenta
+* cyan
+* white
 
 <hr>
 <h4>Tab Handling</h4>
