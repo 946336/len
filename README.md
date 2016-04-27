@@ -50,19 +50,19 @@ Causes `-c` to color backgrounds instead of the text.
 **-a, --alternate-colors**<br>
 Requires `-c` or `--color`. Causes filenames to be displayed in two alternating colors. These colors can be changed via `--file-color`, `--file-color-alt`, and `--file-colors`, explained below.
 
-**--file-color** *`COLOR`*<br>
+**--file-color** `COLOR`<br>
 Set the primary filename color to `COLOR`. Default is cyan. Used only when printing filename headers.
 
-**--file-color-alt** *`COLOR`*<br>
+**--file-color-alt** `COLOR`<br>
 Set the secondary filename color to `COLOR`. Default is magenta. Used only when printing filename headers with alternating colors (`-a` or `--alternate-colors`).
 
-**--file_colors** *`PRIMARY`* *`SECONDARY`*<br>
+**--file_colors** `PRIMARY` `SECONDARY`<br>
 Implies `-a`. Equivalent to `-a --file-color PRIMARY --file-color-alt SECONDARY`.
 
-**--set-bad** *`COLOR`*<br>
+**--set-bad** `COLOR`<br>
 Sets the color for out-of-tolerance portions of lines to `COLOR`. Default is red.
 
-**--set-good** *`COLOR`*<br>
+**--set-good** `COLOR`<br>
 Sets the color for in-tolerance portions of lines to `COLOR`. Default is green.
 
 **-h, --help**<br>
