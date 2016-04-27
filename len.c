@@ -654,7 +654,7 @@ static COLOR_T strtocolor(char *str)
         else if (strcmp(str, cyan_str) == 0)    return cyan;
         else if (strcmp(str, white_str) == 0)   return white;
         else if (strcmp(str, def_str) == 0)     return def;
-        else return def_str;
+        else return def;
 }
 
 /* Expanding tabs is controlled by the MY_GETLINE_TABWIDTH define */
