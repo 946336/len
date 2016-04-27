@@ -138,6 +138,22 @@ static bool             inverted        = false;
                                 exit(BAD_ARGS);                              \
                      }
 
+#define PRINT_FILENAME_HEADER                                                \
+                if (numFiles > 1) {                                          \
+                        if (PRINTING) {                                      \
+                                if (fd != stdin){                            \
+                                        fprintf(stdout, "--|%d: %s|--\n",    \
+                                                numFiles - (argc - i) + 1,   \
+                                                argv[i]);                    \
+                                }                                            \
+                                else {                                       \
+                                        fprintf(stdout, "--|%d: %s|--\n",    \
+                                                numFiles - (argc - i) + 1,   \
+                                                "Standard Input");           \
+                                }                                            \
+                        }                                                    \
+                }
+
 /* Shorthand for matching long and short flags */
 #define MATCH_S(I, J, SHORT_FLAG) argv[I][J] == SHORT_FLAG
 #define MATCH_L(I, LONG_FLAG) !strcmp(&(argv[I][2]), LONG_FLAG)
@@ -181,6 +197,12 @@ int main(int argc, char **argv)
 
         int numFiles = argc - i;
 
+        /* Since getline counts newlines, we need to allow for them */
+        if (!newlines) {
+            ++maxLen;
+        }
+
+
         /* These must persist and are set for each file examined */
         FILE *fd = NULL;
         char *buf = NULL;
@@ -208,6 +230,9 @@ int main(int argc, char **argv)
         /* cause the entire batch to be reported as bad                  */
         bool violated = false;
 
+        /* Track per-file violations for conditional filename header printing */
+        bool violatedHere = false;
+
         /* Process each remaining argument as a filename */
         for (; i < argc; ++i) {
                 if (argv[i][0] == READ_STDIN) {
@@ -224,34 +249,15 @@ int main(int argc, char **argv)
                         exit(BAD_FILE);
                 }
 
+                violatedHere = false;
+
                 if (PRINTING && color) term_default();
 
-                /* In the case where more than one file is examined, we  */
-                /* label the relevant contents of each file              */
-                if (numFiles > 1) {
-                        if (PRINTING) {
-                                if (fd != stdin){
-                                        fprintf(stdout, "\n--|%d: %s|--\n",
-                                                numFiles - (argc - i) + 1,
-                                                argv[i]);
-                                }
-                                else {
-                                        fprintf(stdout, "\n--|%d: %s|--\n",
-                                                numFiles - (argc - i) + 1,
-                                                "Standard Input");
-                                }
-                        }
-                }
 
                 size_t line = 0;
                 size_t len = -1;
                 size_t index = 0;
                 size_t charCount = 0;
-
-                /* Since getline counts newlines, we need to allow for them */
-                if (!newlines) {
-                    ++maxLen;
-                }
 
                 /* Assignment evaluates to the value assigned */
                 while((len = my_getline(&buf, &size, fd)) !=
@@ -268,7 +274,11 @@ int main(int argc, char **argv)
                         /* Don't count newlines at the end of non    */
                         /* empty lines. ( > instead of >= )          */ 
                         if ((len < minLen || len > maxLen)) {
+                                /* Label files at first violation. Don't call */                            
+                                /* out files completely within tolerance.     */
+                                if (!violatedHere) PRINT_FILENAME_HEADER;
                                 violated = true;
+                                violatedHere = true;
                                 if (!offenders && !printAll) continue;
                         } else {
                                 if (offenders && !printAll) continue;
@@ -365,7 +375,7 @@ int main(int argc, char **argv)
         }
 
         /* Extra newline at end of output for visual clarity */
-        if (PRINTING) fprintf(stdout, "\n");
+        // if (PRINTING) fprintf(stdout, "\n");
 
         free(buf);
         return violated ? EXIT_FAILURE : EXIT_SUCCESS;
