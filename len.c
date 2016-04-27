@@ -49,9 +49,11 @@ const char *HELP_ME =
 "--file-color: Sets the primary filename color\n"
 "--file-color-alt: Sets the secondary filename color\n"
 "--file-colors: Requires 2 colors as arguments. Equivalent to specifying both\n"
-"               --file-color and --file-color-alt\n"
+"               --file-color and --file-color-alt in that order\n"
 "--set-bad: Set the color for out-of-range portions of lines\n"
 "--set-good: Set the color for in-range portions of lines\n"
+"--set-colors: Requires two arguments. Equivalent to specifying both\n"
+"              --set-good and --set-bad in that order\n"
 "-h, --help: Display this help and exit\n\n"
 "Colors: red, green, yellow, blue, magenta, cyan, white\n\n"
 "Return values:\n"
@@ -101,8 +103,9 @@ const char      *ALT_LONG           = "alternate-colors";
 const char      *SET_FILE_LONG      = "file-color";
 const char      *SET_FILE_ALT_LONG  = "file-color-alt";
 const char      *FILE_LONG          = "file-colors";
-const char      *SET_BAD_LONG      = "set-bad";
-const char      *SET_GOOD_LONG     = "set-good";
+const char      *SET_BAD_LONG       = "set-bad";
+const char      *SET_GOOD_LONG      = "set-good";
+const char      *SET_COLORS_LONG    = "set-colors";
 
 const char      TRUNCATE_CHAR   = '+';
 const char      TAB             = '\t';
@@ -485,12 +488,15 @@ int parseArgs(int argc, char **argv)
                                         alternate = true;
                                 } else if (MATCH_L(i, SET_GOOD_LONG)) {
                                         good_color = strtocolor(argv[++i]);
+                                } else if (MATCH_L(i, SET_BAD_LONG)) {
+                                        bad_color = strtocolor(argv[++i]);
+                                } else if (MATCH_L(i, SET_COLORS_LONG)) {
+                                        good_color = strtocolor(argv[++i]);
+                                        bad_color = strtocolor(argv[++i]);
                                 } else if (MATCH_L(i, SET_FILE_LONG)) {
                                         file_color = strtocolor(argv[++i]);
                                 } else if (MATCH_L(i, SET_FILE_ALT_LONG)) {
                                         file_alt = strtocolor(argv[++i]);
-                                } else if (MATCH_L(i, SET_BAD_LONG)) {
-                                        bad_color = strtocolor(argv[++i]);
                                 } else if (MATCH_L(i, FILE_LONG)) {
                                         file_color = strtocolor(argv[++i]);
                                         file_alt = strtocolor(argv[++i]);

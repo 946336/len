@@ -63,7 +63,7 @@ Requires \-c or \-\-color. Causes filenames to be displayed in two alternating c
 Set the primary filename color to \fICOLOR\fR. Default is cyan. Used only when printing filename headers.
 .TP
 \fB\-\-file\-color\-alt\fR \fICOLOR\fR
-Set the secondary filename color to \fICOLOR\fR. Default is magenta. Used only when printing filename headers with alternating colors (-a or \-\-\alternate\-colors).
+Set the secondary filename color to \fICOLOR\fR. Default is magenta. Used only when printing filename headers with alternating colors (-a or \-\-alternate\-colors).
 .TP
 \fB\-\-file\-colors\fR \fIPRIMARY SECONDARY\fR
 Implies \-a. Equivalent to "\-a \-\-file\-color \fIPRIMARY\fR \-\-file\-color\-alt \fISECONDARY\fR".
@@ -73,7 +73,9 @@ Sets the color for out\-of\-tolerance portions of lines to \fICOLOR\fR. Default 
 .TP
 \fB\-\-set\-good\fR \fICOLOR\fR
 Sets the color for in\-tolerance portions of lines to \fICOLOR\fR. Default is green.
-
+.TP
+\fB\-\-set\-colors\fR \fIGOOD BAD\fR
+Equivalent to "\-\-set\-good \fIGOOD\fR \-\-set\-bad \fIBAD\fR".
 .TP
 \fB\-h, \-\-help\fR
 Display help and exit.

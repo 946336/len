@@ -65,6 +65,9 @@ Sets the color for out-of-tolerance portions of lines to `COLOR`. Default is red
 **--set-good** `COLOR`<br>
 Sets the color for in-tolerance portions of lines to `COLOR`. Default is green.
 
+**--set-colors** `GOOD` `BAD`<br>
+Equivalent to `--set-good GOOD --set-bad BAD`.
+
 **-h, --help**<br>
 Display help and exit
 
