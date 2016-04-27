@@ -23,7 +23,7 @@ const char      *NO_COMBINE             = "Cannot combine option:";
 
 /* Help text */
 const char *HELP_ME = 
-"len version 1.1: Line length checker\n\n"
+"len version 1.3: Line length checker\n\n"
 "Usage: len [OPTIONS] {filename,-}\n"
 "       Specify [-] as the last option to read from stdin.\n\n"
 "Options:\n"
@@ -45,7 +45,15 @@ const char *HELP_ME =
 "-N, --count-newlines: Include newline characters when calculating line\n"
 "                      length. Off by default\n"
 "-i, --invert-colors: Makes -c color backgrounds instead of text\n"
+"-a, --alternate-colors: Alternates colors on successive files\n"
+"--file-color: Sets the primary filename color\n"
+"--file-color-alt: Sets the secondary filename color\n"
+"--file-colors: Requires 2 colors as arguments. Equivalent to specifying both\n"
+"               --file-color and --file-color-alt\n"
+"--set-bad: Set the color for out-of-range portions of lines\n"
+"--set-good: Set the color for in-range portions of lines\n"
 "-h, --help: Display this help and exit\n\n"
+"Colors: red, green, yellow, blue, magenta, cyan, white\n\n"
 "Return values:\n"
 "    Other values indicate other errors\n"
 "      0 - All lines were within the specified range\n"
@@ -70,6 +78,7 @@ const char      LINE_LENGTHS    = 'l';
 const char      NEWLINES        = 'N';
 const char      INVERT          = 'i';
 const char      HELP            = 'h';
+const char      ALT             = 'a';
 
 /* Specify this last to read from stdin */
 const char      READ_STDIN     = '-';
@@ -88,6 +97,12 @@ const char      *TRUNCATE_LONG      = "truncate";
 const char      *NEWLINES_LONG      = "count-newlines";
 const char      *LINE_LENGTHS_LONG  = "line-lengths";
 const char      *INVERT_LONG        = "invert-colors";
+const char      *ALT_LONG           = "alternate-colors";
+const char      *SET_FILE_LONG      = "file-color";
+const char      *SET_FILE_ALT_LONG  = "file-color-alt";
+const char      *FILE_LONG          = "file-colors";
+const char      *SET_BAD_LONG      = "set-bad";
+const char      *SET_GOOD_LONG     = "set-good";
 
 const char      TRUNCATE_CHAR   = '+';
 const char      TAB             = '\t';
@@ -117,6 +132,35 @@ static bool             truncate        = false;
 static bool             newlines        = false; 
 static bool             lineLengths     = false;
 static bool             inverted        = false;
+static bool             alternate       = false;
+
+/* Colors */
+#define red     "1;31"
+#define green   "1;32"
+#define yellow  "1;33"
+#define blue    "1;34"
+#define magenta "1;35"
+#define cyan    "1;36"
+#define white   "1;37"
+#define def     "1;0" 
+/* More colors */
+#define red_str     "red"
+#define green_str   "green"
+#define yellow_str  "yellow"
+#define blue_str    "blue"
+#define magenta_str "magenta"
+#define cyan_str    "cyan"
+#define white_str   "white"
+#define def_str     "default"
+
+/* Flags for colors */
+typedef const char *COLOR_T;
+
+COLOR_T good_color = green;
+COLOR_T  bad_color = red;
+
+COLOR_T file_color = magenta;
+COLOR_T file_alt   = cyan;
 
 /****************************************************************************/
 
@@ -142,14 +186,18 @@ static bool             inverted        = false;
                 if (numFiles > 1) {                                          \
                         if (PRINTING) {                                      \
                                 if (fd != stdin){                            \
+                                        term_file();                         \
                                         fprintf(stdout, "--|%d: %s|--\n",    \
                                                 numFiles - (argc - i) + 1,   \
                                                 argv[i]);                    \
+                                        term_default();                      \
                                 }                                            \
                                 else {                                       \
+                                        term_file();                         \
                                         fprintf(stdout, "--|%d: %s|--\n",    \
                                                 numFiles - (argc - i) + 1,   \
                                                 "Standard Input");           \
+                                        term_default();                      \
                                 }                                            \
                         }                                                    \
                 }
@@ -162,10 +210,12 @@ static bool             inverted        = false;
 /* Printout enabled by the "flags" option */
 inline static void print_flags(int i, int argc);
 
-/* Changes the text color of the terminal */
-inline static void term_red();
-inline static void term_green();
+/* Functions relating to colors */
 inline static void term_default();
+inline static void term_color(bool isGood);
+inline static void term_file();
+
+static COLOR_T strtocolor(char *str);
 
 /* my_getline() will react to the MY_GETLINE_TABWIDTH macro by expanding */
 /* tabs to that many spaces                                              */
@@ -274,7 +324,7 @@ int main(int argc, char **argv)
                         /* Don't count newlines at the end of non    */
                         /* empty lines. ( > instead of >= )          */ 
                         if ((len < minLen || len > maxLen)) {
-                                /* Label files at first violation. Don't call */                            
+                                /* Label files at first violation. Don't call */
                                 /* out files completely within tolerance.     */
                                 if (!violatedHere) PRINT_FILENAME_HEADER;
                                 violated = true;
@@ -296,8 +346,8 @@ int main(int argc, char **argv)
                                 fputc(' ', stdout);
                                 if ((color) && (len != 1)){
                                         if (len < minLen || len > maxLen)
-                                                term_red();
-                                        else term_green();
+                                                term_color(false);
+                                        else term_color(true);
                                 }
                                 /* We may or may not want to count newlines */
                                 fprintf(stdout, "[%3lu]", newlines ?
@@ -323,7 +373,7 @@ int main(int argc, char **argv)
                                 if (!overMaxLen && charCount >= (maxLen - 1)) {
                                         overMaxLen = true;
                                         if (PRINTING && color)
-                                                term_red();
+                                                term_color(false);
                                         if (truncate) {
                                                 fprintf(stdout, "%c",
                                                         TRUNCATE_CHAR);
@@ -341,7 +391,7 @@ int main(int argc, char **argv)
                                                 if (color && (minLen != 1))
                                                         if ((len <= maxLen) ||
                                                             printAll)
-                                                                term_green();
+                                                               term_color(true);
                                         }
                                 }
 
@@ -356,7 +406,7 @@ int main(int argc, char **argv)
                         /* Don't punish empty lines, but don't forget to  */
                         /* account for the newline in nonempty lines      */
                         if (minLen != 1 && len > 1 && charCount < minLen) {
-                                if (PRINTING && color) term_red();
+                                if (PRINTING && color) term_color(false);
                                 for (; charCount < (minLen - 1); ++charCount) {
                                         if (color) {
                                                 fprintf(stdout, "%c",
@@ -431,6 +481,20 @@ int parseArgs(int argc, char **argv)
                                         newlines = true;
                                 } else if (MATCH_L(i, INVERT_LONG)) {
                                         inverted = true;
+                                } else if (MATCH_L(i, ALT_LONG)) {
+                                        alternate = true;
+                                } else if (MATCH_L(i, SET_GOOD_LONG)) {
+                                        good_color = strtocolor(argv[++i]);
+                                } else if (MATCH_L(i, SET_FILE_LONG)) {
+                                        file_color = strtocolor(argv[++i]);
+                                } else if (MATCH_L(i, SET_FILE_ALT_LONG)) {
+                                        file_alt = strtocolor(argv[++i]);
+                                } else if (MATCH_L(i, SET_BAD_LONG)) {
+                                        bad_color = strtocolor(argv[++i]);
+                                } else if (MATCH_L(i, FILE_LONG)) {
+                                        file_color = strtocolor(argv[++i]);
+                                        file_alt = strtocolor(argv[++i]);
+                                        alternate = true;
                                 } else if (MATCH_L(i, HELP_LONG)) {
                                         fprintf(stdout, "%s\n", HELP_ME);
                                         exit(EXIT_SUCCESS);
@@ -508,6 +572,8 @@ int parseArgs(int argc, char **argv)
                                 newlines = true;
                         } else if (MATCH_S(i, j, INVERT)) {
                                 inverted = true;
+                        } else if (MATCH_S(i, j, ALT)) {
+                                alternate = true;
                         } else if (MATCH_S(i, j, HELP)) {
                                 fprintf(stdout, "%s\n", HELP_ME);
                                 exit(EXIT_SUCCESS);
@@ -542,24 +608,46 @@ inline static void print_flags(int i, int argc)
                                     lineLengths ? "true" : "false");
         fprintf(stderr, "%s: %s\n", "count newlines?",
                                     newlines ? "true" : "false");
+        fprintf(stderr, "%s: %s\n", "alternate", alternate ? "true" : "false");
 }
 
 static const char *ESC = "\033[";
 static const char *INV = "\033[1;7;";
 
-inline static void term_red()
-{
-        printf("%s31m", inverted ? INV : ESC);
-}
-
-inline static void term_green()
-{
-        printf("%s32m", inverted ? INV : ESC);
-}
-
 inline static void term_default()
 {
         printf("%s0m", ESC);
+}
+
+inline static void term_color(bool isGood)
+{
+        fprintf(stdout, "%s%sm", inverted ? INV : ESC,
+                                 isGood ? good_color : bad_color);
+}
+
+inline static void term_file()
+{
+    static bool alt = false;
+    if (color) {
+        fprintf(stdout, "%s%sm", inverted ? INV : ESC,
+                                 alt ? file_color : file_alt);
+    }
+    if (alternate) alt = !alt; 
+}
+
+static COLOR_T strtocolor(char *str)
+{
+        if (str == NULL) return def_str;
+
+        if      (strcmp(str, red_str) == 0)     return red;
+        else if (strcmp(str, green_str) == 0)   return green;
+        else if (strcmp(str, yellow_str) == 0)  return yellow;
+        else if (strcmp(str, blue_str) == 0)    return blue;
+        else if (strcmp(str, magenta_str) == 0) return magenta;
+        else if (strcmp(str, cyan_str) == 0)    return cyan;
+        else if (strcmp(str, white_str) == 0)   return white;
+        else if (strcmp(str, def_str) == 0)     return def;
+        else return def_str;
 }
 
 /* Expanding tabs is controlled by the MY_GETLINE_TABWIDTH define */

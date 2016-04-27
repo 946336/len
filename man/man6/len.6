@@ -1,5 +1,5 @@
 .\" Manpage for len.
-.TH man 6 "14 March 2016" "1.2" "Nonstandard Utility: \fBlen\fR"
+.TH man 6 "27 April 2016" "1.3" "Nonstandard Utility: \fBlen\fR"
 .SH NAME
 .PP
 \fBlen\fR \- ensure the line lengths of a plaintext file are within a certain range. Originally intended for source code.
@@ -56,6 +56,25 @@ Counts newlines when calculating line lengths. Note that all newline sequences a
 \fB\-i, \-\-invert\-colors\fR
 Causes output that would be colored to instead have its background colored. Has no effect unless \-c is specified
 .TP
+\fB\-a, \-\-alternate\-colors\fR
+Requires \-c or \-\-color. Causes filenames to be displayed in two alternating colors. These colors can be changed via \-\-file\-color, \-\-file\-color\-alt, and/or \-\-file\-colors, explained below.
+.TP
+\fB\-\-file\-color\fR \fICOLOR\fR
+Set the primary filename color to \fICOLOR\fR. Default is cyan. Used only when printing filename headers.
+.TP
+\fB\-\-file\-color\-alt\fR \fICOLOR\fR
+Set the secondary filename color to \fICOLOR\fR. Default is magenta. Used only when printing filename headers with alternating colors (-a or \-\-\alternate\-colors).
+.TP
+\fB\-\-file\-colors\fR \fIPRIMARY SECONDARY\fR
+Implies \-a. Equivalent to "\-a \-\-file\-color \fIPRIMARY\fR \-\-file\-color\-alt \fISECONDARY\fR".
+.TP
+\fB\-\-set\-bad\fR \fICOLOR\fR
+Sets the color for out\-of\-tolerance portions of lines to \fICOLOR\fR. Default is red.
+.TP
+\fB\-\-set\-good\fR \fICOLOR\fR
+Sets the color for in\-tolerance portions of lines to \fICOLOR\fR. Default is green.
+
+.TP
 \fB\-h, \-\-help\fR
 Display help and exit.
 .SH EXAMPLES
@@ -70,8 +89,7 @@ Checks that all lines in all files named are within tolerance.
 Checks FILE to make sure all lines are between \fIMIN_LINE_LENGTH\fR and \fIMAX_LINE_LENGTH\fR characters long.
 .TP
 \fBlen\fR \fB\-np\fR \fIFILE\fR
-Checks \fIFILE\fR, prints all lines that are out of tolerance, and gives line
-numbers
+Checks \fIFILE\fR, prints all lines that are out of tolerance, and gives line numbers
 .TP
 \fBlen\fR \fB\-npr\fR \fIFILE\fR
 Truncates long lines instead of showing full lines.
