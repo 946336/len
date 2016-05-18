@@ -233,11 +233,6 @@ int parseArgs(int argc, char **argv);
 
 int main(int argc, char **argv)
 {
-
-        for (int i = 0; i < argc; ++i)
-            printf("%s ", argv[i]);
-        printf("\n");
-
         if (argc == 1) {
                 fprintf(stderr, "%s\n", USAGE);
                 exit(NO_ARGS);
