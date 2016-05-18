@@ -233,6 +233,11 @@ int parseArgs(int argc, char **argv);
 
 int main(int argc, char **argv)
 {
+
+        for (int i = 0; i < argc; ++i)
+            printf("%s ", argv[i]);
+        printf("\n");
+
         if (argc == 1) {
                 fprintf(stderr, "%s\n", USAGE);
                 exit(NO_ARGS);
@@ -448,17 +453,14 @@ int parseArgs(int argc, char **argv)
                                         ARG_CHECK(i);
                                         maxLen = strtol(argv[i],
                                                         (char **)NULL, 10);
-                                        break;
                                 } else if (MATCH_L(i, MIN_LONG)) {
                                         ARG_CHECK(i);
                                         minLen = strtol(argv[i],
                                                  (char **)NULL, 10);
-                                        break;
                                 } else if (MATCH_L(i, TABWIDTH_LONG)) {
                                         ARG_CHECK(i);
                                         tabWidth = strtol(argv[i],
                                                          (char **)NULL, 10);
-                                        break;
                                 } else if (MATCH_L(i, MATCHES_LONG)) {
                                         if (offenders) printAll = true;
                                         if (!print) {
