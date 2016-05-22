@@ -54,9 +54,17 @@ dispFrame = Frame(top)
 fileFrame = Frame(top)
 confFrame = Frame(top)
 
+# Scrollbar, if possible
+scrollbar = Scrollbar(dispFrame)
+scrollbar.pack(side = RIGHT, fill = Y)
+
 # Display contents
 textbox = act.AnsiColorText(dispFrame)
+textbox.configure(yscrollcommand = scrollbar.set)x
 statusLabel = Label(dispFrame, text = "[Verdict]")
+
+# ???
+scrollbar.configure(command = textbox.yview)
 
 # ------------------------------------------------------------------------------
 
