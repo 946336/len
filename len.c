@@ -149,7 +149,7 @@ static bool             alternate       = false;
 /* Flags for colors */
 typedef const char *COLOR_T;
 
-/* NSI color sequences: bold to make them easier to see */
+/* ANSI color sequences: bold to make them easier to see */
 #define red     "1;31"
 #define green   "1;32"
 #define yellow  "1;33"
@@ -174,9 +174,9 @@ COLOR_T file_alt   = cyan;
 /* WARNING: The following macros depend on non-global variables! Check their */
 /*          scope before using them!                                         */
 
-/* Don't forget that the last arg is a filename                          */
-/* Used to make sure that the arguments given to flags that require them */
-/* are "valid".                                                          */
+/* Don't forget that the last arg is a filename                              */
+/* Used to make sure that the arguments given to flags that require them     */
+/* are "valid".                                                              */
 /* Scope: arg_check */
 #define ARG_CHECK(I) if ((argc - 1) < ++I) {                                 \
                                 fprintf(stderr, "%s %s %s\n", BAD_ARG,       \
@@ -255,12 +255,14 @@ int main(int argc, char **argv)
 
         int numFiles = argc - i;
 
-        /* Since getline counts newlines, we need to allow for them */
+        /* Since getline counts newlines, we need to allow for them  */
         if (!newlines) {
             ++maxLen;
+            /* We need to shift the minimum length up by one as well */
+            if (minLen != 1) ++minLen;
         }
 
-        /* These must persist and are set for each file examined */
+        /* These must persist and are set for each file examined     */
         FILE *fd = NULL;
         char *buf = NULL;
         size_t size = 0;
@@ -283,8 +285,8 @@ int main(int argc, char **argv)
                 exit(BAD_FILE);
         }
 
-        /* violated is tracked cumulatively. A violation in any file will */
-        /* cause the entire batch to be reported as bad                  */
+        /* violated is tracked cumulatively. A violation in any file will     */
+        /* cause the entire batch to be reported as bad                       */
         bool violated = false;
 
         /* Track per-file violations for conditional filename header printing */
@@ -322,8 +324,8 @@ int main(int argc, char **argv)
                         /* Real life counting is 1-indexed */
                         ++line;
 
-                        /* Don't process blank lines for violations,  */
-                        /* but do print them when printing files      */
+                        /* Don't process blank lines for violations, */
+                        /* but do print them when printing files     */
                         if (len == 1 && !printAll) continue;
 
                         /* Print lines that fit none, either, or any */
@@ -457,13 +459,13 @@ int parseArgs(int argc, char **argv)
                                         tabWidth = strtol(argv[i],
                                                          (char **)NULL, 10);
                                 } else if (MATCH_L(i, MATCHES_LONG)) {
-                                        if (offenders) printAll = true;
+                                        if (print) printAll = true;
                                         if (!print) {
                                                 print = true;
                                                 offenders = false;
                                         }
                                 } else if (MATCH_L(i, OFFENDERS_LONG)) {
-                                        if (!offenders) printAll = true;
+                                        if (print) printAll = true;
                                         if (!print) {
                                                 print = true;
                                                 offenders = true;
