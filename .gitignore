@@ -30,3 +30,9 @@
 
 # Debug files
 *.dSYM/
+
+# Compiled Python Bytecode
+*.pyc
+
+# Backups
+*.*~
