@@ -36,3 +36,12 @@
 
 # Backups
 *.*~
+
+# YCM configuration
+.ycm_extra_conf.py
+
+# Misc other files
+len
+len6.html
+notes
+testFile
