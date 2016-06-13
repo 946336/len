@@ -60,7 +60,7 @@ scrollbar.pack(side = RIGHT, fill = Y)
 
 # Display contents
 textbox = act.AnsiColorText(dispFrame)
-textbox.configure(yscrollcommand = scrollbar.set)
+textbox.configure(yscrollcommand = scrollbar.set)x
 statusLabel = Label(dispFrame, text = "[Verdict]")
 
 # ???
