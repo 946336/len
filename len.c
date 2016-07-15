@@ -22,7 +22,7 @@ const char      *BAD_OPTION             = "Unrecognized option:";
 const char      *NO_COMBINE             = "Cannot combine option:";
 
 /* Help text */
-const char *HELP_ME = 
+const char *HELP_ME =
 "len version 1.3: Line length checker\n"
 "Usage: len [OPTIONS] {filename,-}\n"
 "       Specify [-] as the last option to read from stdin.\n"
@@ -142,7 +142,7 @@ static bool             lineNums        = false;
 static bool             color           = false;
 static bool             flags           = false;
 static bool             truncate        = false;
-static bool             newlines        = false; 
+static bool             newlines        = false;
 static bool             lineLengths     = false;
 static bool             inverted        = false;
 static bool             alternate       = false;
@@ -157,7 +157,7 @@ typedef const char *COLOR_T;
 #define magenta "1;35"
 #define cyan    "1;36"
 #define white   "1;37"
-#define def     "1;0" 
+#define def     "1;0"
 
 COLOR_T good_color = green;
 COLOR_T bad_color  = red;
@@ -237,7 +237,7 @@ int main(int argc, char **argv)
                 fprintf(stderr, "%s\n", USAGE);
                 exit(NO_ARGS);
         }
-        
+
         /* i gives the index of the first filename */
         int i = parseArgs(argc, argv);
 
@@ -331,7 +331,7 @@ int main(int argc, char **argv)
                         /* Print lines that fit none, either, or any */
                         /* condition. Track violations of the range. */
                         /* Don't count newlines at the end of non    */
-                        /* empty lines. ( > instead of >= )          */ 
+                        /* empty lines. ( > instead of >= )          */
                         if ((len < minLen || len > maxLen)) {
                                 /* Label files at first violation. Don't call */
                                 /* out files completely within tolerance.     */
@@ -444,7 +444,7 @@ int parseArgs(int argc, char **argv)
                 if (MATCH_S(i, 0, OPTION)){
                         if (MATCH_S(i, 1, NULLCHAR)) {
                                 return i;
-                        }                        
+                        }
                         if (MATCH_S(i, 1, OPTION)){ /* Long form options */
                                 if (MATCH_L(i, MAX_LONG)) {
                                         ARG_CHECK(i);
@@ -638,7 +638,7 @@ inline static void term_file()
         fprintf(stdout, "%s%sm", inverted ? INV : ESC,
                                  alt ? file_color : file_alt);
     }
-    if (alternate) alt = !alt; 
+    if (alternate) alt = !alt;
 }
 
 static COLOR_T strtocolor(char *str)
@@ -722,7 +722,7 @@ size_t my_getline(char **buf, size_t *size, FILE *fd)
                                         }
                                         #if defined(MY_GETLINE_TABSTOPS)
                                         int dst_to_tabstop =
-                                                ((i % MY_GETLINE_TABWIDTH) ? 
+                                                ((i % MY_GETLINE_TABWIDTH) ?
                                                 (i % MY_GETLINE_TABWIDTH) :
                                                 MY_GETLINE_TABWIDTH);
                                         for (size_t q = i;
