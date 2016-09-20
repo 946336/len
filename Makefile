@@ -12,6 +12,7 @@ len: len.c
 len-debug: len.c
 	$(CC) $(CFLAGS) $(DEBUG) $^ -o $@
 
+# Only useful if you cloned a gui branch
 configure:
 	sed -i "s|PATH_TO_EXECUTABLE|`pwd`|g" lenfuncs.py lengui.py
 	ln -sf lengui.py glen

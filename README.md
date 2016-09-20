@@ -10,6 +10,17 @@ When piping output from `len` to `less`, be sure to specify `-r` with `less` if 
 Feel free to glance at the floppy noodle that is the source code - I've tried to leave helpful comments, but those can only go so far.
 
 <hr>
+<h4>Installation/Building</h4>
+
+`make`
+
+`len` does not impose itself by attempting to place an executable somewhere
+like `/usr/bin/`. `len` trusts you to place it where it needs to be.
+
+I suggest either placing the executable or a symlink to it in `${HOME}/bin/`
+if you're on a Linux system.
+
+<hr>
 <h4>Options</h4>
 **-m, --max** `MAX_LINE_LENGTH`<br>
 Set the upper limit of line lengths. This cannot be negative or less than the lower limit, described below.<br>
