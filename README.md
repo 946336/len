@@ -12,7 +12,9 @@ Feel free to glance at the floppy noodle that is the source code - I've tried to
 <hr>
 <h4>Usage</h4>
 
-`len [OPTIONS] {FILES}`
+`len [OPTIONS] {FILES,-}`
+
+Specify `-` in place of a filename to read from `stdin`. `-` should appear at most once.
 
 <hr>
 <h4>Installation/Building</h4>
