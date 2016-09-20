@@ -10,6 +10,11 @@ When piping output from `len` to `less`, be sure to specify `-r` with `less` if 
 Feel free to glance at the floppy noodle that is the source code - I've tried to leave helpful comments, but those can only go so far.
 
 <hr>
+<h4>Usage</h4>
+
+`len [OPTIONS] {FILES}`
+
+<hr>
 <h4>Installation/Building</h4>
 
 `make`
